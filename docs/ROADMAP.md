@@ -106,12 +106,13 @@ que é exatamente a situação de hoje.
 `models/`; **HAL** (`IBoard`, `MockBoard`, `WaveshareBoard` mínima: display,
 locks, brilho e RTC); tabela de partições A/B; gates estáticos e workflow de
 CI; `main/` como wiring. O núcleo entregue contém `StateStore`, `EventBus`,
-`ActionQueue` com overflow contado, `UiDispatcher` e pump de eventos; `utils/`
+`ActionQueue` com overflow contado, `UiDispatcher`, pump de eventos e
+`RequestOrchestrator` (prioridade, intervalo, gap global e breaker); `utils/`
 contém `Status` e `Result<T>` (inclusive para tipos sem construtor padrão).
 
-**Entregas restantes.** `RequestOrchestrator` e `ServiceManager`; cliente HTTP
-com teto tratado como falha; interfaces de provider; registro de telas vazio e
-shell de UI. A Onda A continua aberta até cumprir todos os critérios abaixo.
+**Entregas restantes.** `ServiceManager`; cliente HTTP com teto tratado como
+falha; interfaces de provider; registro de telas vazio e shell de UI. A Onda A
+continua aberta até cumprir todos os critérios abaixo.
 
 **Critérios de saída**
 

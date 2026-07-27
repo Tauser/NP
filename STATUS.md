@@ -19,7 +19,7 @@
 | Onda atual | **Onda A — Fundação** (em andamento). Onda 0 fechada: glitch atribuído e corrigido | 2026-07-26 |
 | Documentação | criada | 2026-07-25 |
 | Scaffolding (VSCode, IDF, gates, CI) | criado; `idf.py build` executado com sucesso (ESP-IDF v5.5.4) | 2026-07-26 |
-| Firmware | HAL (`board/`) + diagnóstico e instrumentação (`diag/`) + núcleo de estado/eventos/fila/dispatcher (`core/`, `models/`) + `utils/`; **valida em placa v1.3**, render sem tearing e rotação correta | 2026-07-27 |
+| Firmware | HAL (`board/`) + diagnóstico e instrumentação (`diag/`) + núcleo de estado/eventos/fila/dispatcher/orquestrador (`core/`, `models/`) + `utils/`; **valida em placa v1.3**, render sem tearing e rotação correta | 2026-07-27 |
 | Hardware | validado; meses de operação contínua sem falha | herdado |
 | Glitch de render | **ATRIBUÍDO — causa-raiz única: DSI sem dados ao ler o framebuffer.** 3 vias: (a) erase de flash no MSPI → **sem correção** (chip não faz suspend) → política; (b) fetch de glyph em flash → mitigar por fonte/área; (c) framebuffer escrito enquanto lido → **CORRIGIDO** (esp_lvgl_adapter, ADR-026), com rotação 180° preservada. 2.1 (alinhamento) descartada | 2026-07-26 |
 | Build PROD validado | não | — |
@@ -29,7 +29,7 @@
 
 ```text
 Onda 0 - Atribuir o glitch de render                 [FECHADA — causa atribuída e corrigida]
-Onda A - Fundação: esqueleto, HAL, CI, render limpo  [em andamento — HAL, render, core/ e utils/ prontos; orquestrador/UI pendentes]
+Onda A - Fundação: esqueleto, HAL, CI, render limpo  [em andamento — HAL, render, core/, utils/ e orquestrador prontos; HTTP/providers/UI pendentes]
 Onda B - Dados reais, cache offline e degradação     [não iniciada]
 Onda C - Telas do produto                            [não iniciada]
 Onda D - Robustez comprovável e observabilidade      [não iniciada]
@@ -68,10 +68,16 @@ como entregue sem todos os critérios atendidos e este arquivo atualizado.**
   - `main/` — `app_main` magro delega para `nova::app::run()` (`boot.cpp`):
     display → primeiro frame → **backlight só depois do primeiro frame**.
   - `firmware/tests/native/` — testes nativos (`test_all.cpp`) da lógica pura.
+  - `components/core/` — `StateStore`, `EventBus`, `ActionQueue`,
+    `UiDispatcher`, pump e `RequestOrchestrator` puro. O orquestrador entrega
+    uma lease global por vez, com prioridade, intervalo, gap, backoff com
+    jitter injetado e breaker `Closed→Open→HalfOpen`; não há HTTP, worker ou
+    wiring de rede ainda.
   - `components/utils/` — `Status` e `Result<T>` puros, sem exceções nem
     alocação dinâmica; `Result<T>` aceita tipos de domínio sem construtor
     padrão inclusive no caminho de falha. Host check e testes nativos passam
-    em 2026-07-27; `idf.py build` desta revisão ainda não foi verificado.
+    em 2026-07-27; `idf.py build` após as revisões de `core/` e `utils/` ainda
+    não foi verificado.
 - **Gates**: `tools/scripts/` — `host_check`, `arch_check`, `size_check`,
   `ui_check`, `hygiene`, `check_all`.
 

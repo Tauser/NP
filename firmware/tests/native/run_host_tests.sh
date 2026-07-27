@@ -31,6 +31,8 @@ INC=(
   "$FW/components/core/src/action_queue.cpp" \
   "$FW/components/core/src/ui_dispatcher.cpp" \
   "$FW/components/core/src/pump.cpp" \
+  "$FW/components/core/src/request_orchestrator.cpp" \
+  "$FW/components/utils/src/status.cpp" \
   -o "$OUT/test_core"
 
 "$CXX" -std="${CXXSTD:-c++17}" -Wall -Wextra -Werror "${INC[@]}" \
@@ -38,6 +40,13 @@ INC=(
   "$FW/components/utils/src/status.cpp" \
   -o "$OUT/test_utils"
 
+"$CXX" -std="${CXXSTD:-c++17}" -Wall -Wextra -Werror "${INC[@]}" \
+  "$HERE/test_request_orchestrator.cpp" \
+  "$FW/components/core/src/request_orchestrator.cpp" \
+  "$FW/components/utils/src/status.cpp" \
+  -o "$OUT/test_request_orchestrator"
+
 "$OUT/test_all"
 "$OUT/test_core"
 "$OUT/test_utils"
+"$OUT/test_request_orchestrator"

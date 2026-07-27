@@ -43,9 +43,9 @@ enum class Status : uint8_t {
 // string em log de campo, que é o que a triagem lê (OPERATIONS §3).
 const char* to_string(Status s);
 
-// Uma falha é "transitória" quando repetir mais tarde é razoável — orienta o
-// backoff do orquestrador. `kMalformed` NÃO é: se o payload mudou de forma,
-// repetir só gasta banda e bateria do provedor.
+// Uma falha é "transitória" quando repetir em curto prazo é razoável — orienta
+// o backoff do orquestrador. `kMalformed` NÃO é: abre o breaker de imediato em
+// vez de gastar a sequência normal de retries num payload que não mudou.
 bool is_transient(Status s);
 
 }  // namespace utils
