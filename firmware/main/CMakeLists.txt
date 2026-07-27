@@ -9,6 +9,7 @@ idf_component_register(
         core
         diag
         services
+        ui
         esp_lvgl_adapter
         esp_timer
 )

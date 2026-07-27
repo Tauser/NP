@@ -112,8 +112,8 @@ contém `Status`, `Result<T>` (inclusive para tipos sem construtor padrão) e o
 contrato `IHttpClient` com coletor de corpo limitado a 48 KiB.
 
 **Entregas restantes.** Contratos dos demais domínios e adapters reais de
-provider; registro de telas vazio e shell de UI. O primeiro contrato
-(`ITimeProvider`) e seu mock já existem. O `ServiceManager`, transporte ESP-IDF e o
+provider; telas de produto sobre o shell já registrado. O primeiro contrato
+(`ITimeProvider`) e seu mock, o registro vazio de telas e o Shell já existem. O `ServiceManager`, transporte ESP-IDF e o
 `NetworkWorker` serializado já existem, mas não há provider, credencial ou
 tráfego real até a validação de heap/TLS em bancada. A Onda A continua aberta até cumprir todos os
 critérios abaixo.

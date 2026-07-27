@@ -16,6 +16,7 @@ INC=(
   -I"$FW/components/models/include"
   -I"$FW/components/providers/include"
   -I"$FW/components/services/include"
+  -I"$FW/components/ui/include"
   -I"$FW/components/utils/include"
 )
 
@@ -75,6 +76,11 @@ INC=(
   "$FW/components/utils/src/status.cpp" \
   -o "$OUT/test_time_provider"
 
+"$CXX" -std="${CXXSTD:-c++17}" -Wall -Wextra -Werror "${INC[@]}" \
+  "$HERE/test_screen_registry.cpp" \
+  "$FW/components/ui/src/screen_registry.cpp" \
+  -o "$OUT/test_screen_registry"
+
 "$OUT/test_all"
 "$OUT/test_core"
 "$OUT/test_service_manager"
@@ -83,3 +89,4 @@ INC=(
 "$OUT/test_http_client"
 "$OUT/test_network_worker"
 "$OUT/test_time_provider"
+"$OUT/test_screen_registry"

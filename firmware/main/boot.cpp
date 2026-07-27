@@ -25,6 +25,8 @@
 #include "services/esp_http_client.hpp"
 #include "services/network_worker.hpp"
 #include "services/network_worker_task.hpp"
+#include "ui/screen_catalog.hpp"
+#include "ui/shell.hpp"
 
 namespace nova {
 namespace app {
@@ -123,9 +125,26 @@ void start_network_worker(core::ILock& lock) {
     }
 }
 #endif
+
+void setup_shell(board::IBoard& board, core::UiDispatcher& dispatcher,
+                 ui::ScreenRegistry& screens, ui::Shell& shell) {
+    ui::register_screens(screens);
+    if (!shell.attach(dispatcher)) {
+        ESP_LOGE(kTag, "shell nao registrou todas as telas");
+        return;
+    }
+    if (!board.lock_ui(0)) {
+        ESP_LOGE(kTag, "lock_ui falhou; shell nao iniciou");
+        return;
+    }
+    if (!shell.start()) {
+        ESP_LOGE(kTag, "shell nao criou timer LVGL");
+    }
+    board.unlock_ui();
+}
 }  // namespace
 
-void app_loop();  // definida abaixo; não retorna
+void app_loop(board::IBoard& board);  // definida abaixo; não retorna
 
 void run() {
     ESP_LOGI(kTag, "NovaPanel — baseline 2026-07 — Onda 0 (atribuir glitch)");
@@ -166,7 +185,7 @@ void run() {
     diag::start_flash_thrash(kFlashThrashPeriodMs);
 #endif
 
-    app_loop();  // não retorna
+    app_loop(board);  // não retorna
 }
 
 // Ciclo da `app_loop` (ARCHITECTURE §5): a ÚNICA task que publica no EventBus e
@@ -174,16 +193,19 @@ void run() {
 //
 // O passo do ciclo é `core::pump_once`, o MESMO código exercitado pelos testes
 // de host. Reimplementar a sequência aqui faria os testes validarem uma cópia.
-void app_loop() {
+void app_loop(board::IBoard& board) {
     static CoreMutex lock;
     static core::EventBus bus;
     static core::StateStore store(lock);
     static core::UiDispatcher dispatcher;
     static core::ServiceManager services;
+    static ui::ScreenRegistry screens;
+    static ui::Shell shell(screens);
 
     if (!bus.subscribe(core::UiDispatcher::on_event, &dispatcher)) {
         ESP_LOGE(kTag, "dispatcher nao assinou o EventBus — UI nao atualizaria");
     }
+    setup_shell(board, dispatcher, screens, shell);
     if (services.start_all() != utils::Status::kOk) {
         ESP_LOGE(kTag, "ServiceManager nao iniciou; firmware permanece degradado");
     }
@@ -194,7 +216,8 @@ void app_loop() {
     // Ainda NÃO há tela registrada: telas são da Onda C (ADR-023). O ciclo roda
     // vazio de propósito — o caminho está fechado e instrumentado, e a primeira
     // tela só precisa se registrar no dispatcher.
-    ESP_LOGI(kTag, "app_loop iniciada (0 telas e 0 providers registrados)");
+    ESP_LOGI(kTag, "app_loop iniciada (%u telas e 0 providers registrados)",
+             static_cast<unsigned>(screens.count()));
 
     for (;;) {
         services.tick_all(static_cast<uint64_t>(esp_timer_get_time() / 1000));

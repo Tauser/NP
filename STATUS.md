@@ -29,7 +29,7 @@
 
 ```text
 Onda 0 - Atribuir o glitch de render                 [FECHADA — causa atribuída e corrigida]
-Onda A - Fundação: esqueleto, HAL, CI, render limpo  [em andamento — HAL, render, core/, utils/, orquestrador, ServiceManager, transporte/worker HTTP e contrato inicial de provider prontos; adapters/domínios restantes/UI pendentes]
+Onda A - Fundação: esqueleto, HAL, CI, render limpo  [em andamento — HAL, render, core/, utils/, orquestrador, ServiceManager, transporte/worker HTTP, contrato inicial de provider e shell/registro de UI prontos; adapters/domínios/telas de produto pendentes]
 Onda B - Dados reais, cache offline e degradação     [não iniciada]
 Onda C - Telas do produto                            [não iniciada]
 Onda D - Robustez comprovável e observabilidade      [não iniciada]
@@ -106,6 +106,13 @@ como entregue sem todos os critérios atendidos e este arquivo atualizado.**
     malformada e truncada conforme ADR-007. Host check/testes/arquitetura
     passaram em 2026-07-27; o build/flash alvo desta revisão passou junto da
     confirmação do operador para `425ba7b`, mas não há teste funcional do provider.
+  - `components/ui/` — `ScreenRegistry` puro aceita specs uma vez, recusa
+    duplicata/capacidade excedida e é selado antes do Shell. O Shell registra
+    invalidações no `UiDispatcher` sem tocar LVGL; um timer que roda na
+    `lvgl_task` é o único caminho que cria/atualiza widgets. O catálogo está
+    propositalmente vazio (ADR-023): não há tela ou dado fictício. Host
+    check/testes/arquitetura/tamanho passaram em 2026-07-27; build ESP-IDF e
+    validação visual desta revisão não foram executados.
 - **Gates**: `tools/scripts/` — `host_check`, `arch_check`, `size_check`,
   `ui_check`, `hygiene`, `check_all`.
 
