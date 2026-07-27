@@ -1,0 +1,21 @@
+# Overlay de EXPERIMENTO — hipótese 2.1 do glitch (docs/GLITCH-PROTOCOLO.md §2.1).
+#
+# NÃO é a configuração de produção. Some sobre o sdkconfig.defaults só para
+# rodar UMA variável: o alinhamento do draw buffer volta ao histórico de 4 B,
+# abaixo da linha de cache L2 (64 B) do P4. É o regime que a ADR-010 corrige.
+#
+# Uso (apagando o sdkconfig gerado, senão o overlay é ignorado):
+#   cd firmware
+#   rm -f sdkconfig
+#   idf.py -DNOVA_TORTURE=ON \
+#          -DSDKCONFIG_DEFAULTS="sdkconfig.defaults;sdkconfig.align4" \
+#          build flash monitor
+#
+# Confirmação sem depender do olho: o log de boot deve passar de
+#   "CONFIG_LV_DRAW_BUF_ALIGN=64 ... veredito 2.1: alinhado POR CONFIG"
+# para
+#   "CONFIG_LV_DRAW_BUF_ALIGN=4 ... veredito 2.1: DESALINHADO"  (ou "por SORTE").
+# Se continuar dizendo 64, o overlay NÃO pegou — apague o sdkconfig e rebuild.
+#
+# Uma variável por reflash: mude SÓ isto entre os dois builds torture.
+CONFIG_LV_DRAW_BUF_ALIGN=4

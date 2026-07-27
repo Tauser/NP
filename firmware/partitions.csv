@@ -1,0 +1,19 @@
+# Tabela fixada na primeira onda e mantida estável daí em diante.
+# Reparticionar depois de haver unidade em campo é proibitivo (ADR-016).
+#
+# Flash de 32 MB:
+#   8 MB por slot de app  → margem para LVGL, BSP e assets
+#  10 MB de storage       → uso offline sem pressionar os slots OTA
+#   1 MB de coredump      → triagem de campo, ligado inclusive em produção
+#   1 MB reservado c6_ota → slave-OTA do ESP32-C6, evita migração destrutiva
+#
+# Name,     Type, SubType,  Offset,  Size,      Flags
+nvs,        data, nvs,      0x9000,  0x8000,
+nvs_keys,   data, nvs_keys, ,        0x1000,    encrypted
+phy_init,   data, phy,      ,        0x1000,
+otadata,    data, ota,      ,        0x2000,
+ota_0,      app,  ota_0,    ,        0x800000,
+ota_1,      app,  ota_1,    ,        0x800000,
+storage,    data, spiffs,   ,        0xA00000,
+coredump,   data, coredump, ,        0x100000,
+c6_ota,     data, 0x40,     ,        0x100000,

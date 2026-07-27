@@ -1,0 +1,29 @@
+# Versões EXATAS, nunca "*" (ADR-022 / docs/SECURITY.md §3).
+#
+# Declarar "*" significa que o build de amanhã pode não ser o de hoje, o que
+# quebra reprodutibilidade e é superfície de cadeia de suprimentos.
+# O dependencies.lock gerado a partir daqui É versionado.
+#
+# Subir qualquer versão é mudança revisada: diff lido, motivo declarado,
+# gates rodados. Componente do caminho gráfico (lvgl, esp_lvgl_port, BSP)
+# ao subir vira gatilho de reavaliação do glitch (ROADMAP.md Onda 0).
+
+dependencies:
+  idf: ">=5.5.0"
+
+  lvgl/lvgl: "==9.4.0"
+  # esp_lvgl_port entra como dependência PÚBLICA do BSP Waveshare; fica no build
+  # mas NÃO é inicializado (não chamamos lvgl_port_init). O backend de display
+  # é o esp_lvgl_adapter — ver ADR-026.
+  espressif/esp_lvgl_port: "==2.8.0"
+  # Backend de display. Substitui o esp_lvgl_port porque suporta, no MESMO
+  # pipeline, rotação + prevenção de tearing (PPA + troca de framebuffer no
+  # momento seguro). O esp_lvgl_port não combina sw_rotate com full_refresh, que
+  # era o bloqueio da Onda 0. Ver ADR-026.
+  espressif/esp_lvgl_adapter: "==0.5.3"
+  waveshare/esp32_p4_wifi6_touch_lcd_7b: "==1.0.4"
+
+  espressif/esp_hosted: "==2.12.11"
+  espressif/esp_wifi_remote: "==1.6.2"
+
+  joltwallet/littlefs: "==1.20.4"

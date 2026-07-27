@@ -1,0 +1,19 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      // Requer OpenOCD da extensao rodando (comando "ESP-IDF: OpenOCD Manager").
+      "name": "P4: debug (JTAG embutido)",
+      "type": "espidf",
+      "request": "launch",
+      "mode": "auto",
+      "verifyAppBinBeforeDebug": true
+    },
+    {
+      "name": "P4: attach (sem reflashar)",
+      "type": "espidf",
+      "request": "attach",
+      "mode": "auto"
+    }
+  ]
+}

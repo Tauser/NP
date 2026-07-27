@@ -1,0 +1,16 @@
+# Overlay de EXPERIMENTO — build de clareza (desambiguação visual do glitch).
+#
+# NÃO é config de produção. Habilita uma fonte grande só para o carimbo de
+# diagnóstico ficar legível a olho e em foto normal. Some sobre o
+# sdkconfig.defaults. Combina com o sdkconfig.align4 para o teste da 2.1:
+#
+#   # baseline limpo (align=64):
+#   rm -f sdkconfig; idf.py -DNOVA_CLARITY=ON \
+#     -DSDKCONFIG_DEFAULTS="sdkconfig.defaults;sdkconfig.clarity" \
+#     fullclean build flash monitor
+#
+#   # teste da hipótese 2.1 (align=4, UMA variável muda):
+#   rm -f sdkconfig; idf.py -DNOVA_CLARITY=ON \
+#     -DSDKCONFIG_DEFAULTS="sdkconfig.defaults;sdkconfig.clarity;sdkconfig.align4" \
+#     fullclean build flash monitor
+CONFIG_LV_FONT_MONTSERRAT_48=y

@@ -1,0 +1,15 @@
+{
+  // O IntelliSense do dia a dia e o clangd (settings.json da raiz).
+  // Este arquivo e fallback para quem abrir sem o clangd instalado; por
+  // isso aponta para o mesmo compile_commands.json gerado pelo IDF.
+  "configurations": [
+    {
+      "name": "ESP-IDF esp32p4",
+      "compileCommands": "${workspaceFolder}/build/compile_commands.json",
+      "cStandard": "c11",
+      "cppStandard": "c++17",
+      "intelliSenseMode": "gcc-x64"
+    }
+  ],
+  "version": 4
+}
