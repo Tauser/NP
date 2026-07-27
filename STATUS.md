@@ -111,8 +111,10 @@ como entregue sem todos os critérios atendidos e este arquivo atualizado.**
     invalidações no `UiDispatcher` sem tocar LVGL; um timer que roda na
     `lvgl_task` é o único caminho que cria/atualiza widgets. O catálogo está
     propositalmente vazio (ADR-023): não há tela ou dado fictício. Host
-    check/testes/arquitetura/tamanho passaram em 2026-07-27; build ESP-IDF e
-    validação visual desta revisão não foram executados.
+    check/testes/arquitetura/tamanho passaram em 2026-07-27; o operador
+    confirmou `idf.py build` + flash da revisão de UI (`22862c2`) em
+    2026-07-27. Não há validação visual de tela de produto nem medição
+    adicional de render: o catálogo permanece vazio.
 - **Gates**: `tools/scripts/` — `host_check`, `arch_check`, `size_check`,
   `ui_check`, `hygiene`, `check_all`.
 
