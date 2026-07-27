@@ -33,8 +33,15 @@ INC=(
   "$FW/components/core/src/ui_dispatcher.cpp" \
   "$FW/components/core/src/pump.cpp" \
   "$FW/components/core/src/request_orchestrator.cpp" \
+  "$FW/components/core/src/service_manager.cpp" \
   "$FW/components/utils/src/status.cpp" \
   -o "$OUT/test_core"
+
+"$CXX" -std="${CXXSTD:-c++17}" -Wall -Wextra -Werror "${INC[@]}" \
+  "$HERE/test_service_manager.cpp" \
+  "$FW/components/core/src/service_manager.cpp" \
+  "$FW/components/utils/src/status.cpp" \
+  -o "$OUT/test_service_manager"
 
 "$CXX" -std="${CXXSTD:-c++17}" -Wall -Wextra -Werror "${INC[@]}" \
   "$HERE/test_utils.cpp" \
@@ -63,6 +70,7 @@ INC=(
 
 "$OUT/test_all"
 "$OUT/test_core"
+"$OUT/test_service_manager"
 "$OUT/test_utils"
 "$OUT/test_request_orchestrator"
 "$OUT/test_http_client"

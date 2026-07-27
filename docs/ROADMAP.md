@@ -111,8 +111,8 @@ CI; `main/` como wiring. O núcleo entregue contém `StateStore`, `EventBus`,
 contém `Status`, `Result<T>` (inclusive para tipos sem construtor padrão) e o
 contrato `IHttpClient` com coletor de corpo limitado a 48 KiB.
 
-**Entregas restantes.** `ServiceManager`; interfaces e adapters de provider;
-registro de telas vazio e shell de UI. O transporte ESP-IDF e o
+**Entregas restantes.** Interfaces e adapters de provider; registro de telas
+vazio e shell de UI. O `ServiceManager`, transporte ESP-IDF e o
 `NetworkWorker` serializado já existem, mas não há provider, credencial ou
 tráfego real até a validação de heap/TLS em bancada. A Onda A continua aberta até cumprir todos os
 critérios abaixo.

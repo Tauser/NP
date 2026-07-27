@@ -10,6 +10,7 @@
 #include "core/event_bus.hpp"
 #include "core/lock.hpp"
 #include "core/pump.hpp"
+#include "core/service_manager.hpp"
 #include "core/state_store.hpp"
 #include "core/ui_dispatcher.hpp"
 #include "diag/boot_diag.hpp"
@@ -17,6 +18,7 @@
 #include "diag/render_probe.hpp"
 #include "diag/render_workout.hpp"
 #include "esp_log.h"
+#include "esp_timer.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/semphr.h"
 #include "freertos/task.h"
@@ -177,9 +179,13 @@ void app_loop() {
     static core::EventBus bus;
     static core::StateStore store(lock);
     static core::UiDispatcher dispatcher;
+    static core::ServiceManager services;
 
     if (!bus.subscribe(core::UiDispatcher::on_event, &dispatcher)) {
         ESP_LOGE(kTag, "dispatcher nao assinou o EventBus — UI nao atualizaria");
+    }
+    if (services.start_all() != utils::Status::kOk) {
+        ESP_LOGE(kTag, "ServiceManager nao iniciou; firmware permanece degradado");
     }
 #ifndef NOVA_TORTURE
     start_network_worker(lock);
@@ -191,6 +197,7 @@ void app_loop() {
     ESP_LOGI(kTag, "app_loop iniciada (0 telas e 0 providers registrados)");
 
     for (;;) {
+        services.tick_all(static_cast<uint64_t>(esp_timer_get_time() / 1000));
         const size_t invalidated = core::pump_once(store, bus, dispatcher);
         if (invalidated > 0) {
             ESP_LOGD(kTag, "tick: %u telas invalidadas", static_cast<unsigned>(invalidated));

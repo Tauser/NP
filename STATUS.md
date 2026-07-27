@@ -29,7 +29,7 @@
 
 ```text
 Onda 0 - Atribuir o glitch de render                 [FECHADA — causa atribuída e corrigida]
-Onda A - Fundação: esqueleto, HAL, CI, render limpo  [em andamento — HAL, render, core/, utils/, orquestrador, transporte/worker HTTP prontos; providers/ServiceManager/UI pendentes]
+Onda A - Fundação: esqueleto, HAL, CI, render limpo  [em andamento — HAL, render, core/, utils/, orquestrador, ServiceManager e transporte/worker HTTP prontos; providers/UI pendentes]
 Onda B - Dados reais, cache offline e degradação     [não iniciada]
 Onda C - Telas do produto                            [não iniciada]
 Onda D - Robustez comprovável e observabilidade      [não iniciada]
@@ -69,7 +69,10 @@ como entregue sem todos os critérios atendidos e este arquivo atualizado.**
     display → primeiro frame → **backlight só depois do primeiro frame**.
   - `firmware/tests/native/` — testes nativos (`test_all.cpp`) da lógica pura.
   - `components/core/` — `StateStore`, `EventBus`, `ActionQueue`,
-    `UiDispatcher`, pump e `RequestOrchestrator` puro. O orquestrador entrega
+    `UiDispatcher`, pump, `RequestOrchestrator` e `ServiceManager` puro. O
+    manager recebe até oito serviços por referência, sela o registro ao
+    iniciar, preserva a ordem em retry de `start()` e só entrega `tick()` aos
+    já inicializados — ciclo de vida exclusivo da `app_loop`. O orquestrador entrega
     uma lease global por vez, com prioridade, intervalo, gap, backoff com
     jitter injetado e breaker `Closed→Open→HalfOpen`; o **core** não conhece
     HTTP, worker nem wiring de rede. O `StateStore` agora recebe no wiring um mutex

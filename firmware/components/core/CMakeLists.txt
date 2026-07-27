@@ -10,6 +10,7 @@ idf_component_register(
         "src/ui_dispatcher.cpp"
         "src/pump.cpp"
         "src/request_orchestrator.cpp"
+        "src/service_manager.cpp"
     INCLUDE_DIRS "include"
     REQUIRES
         models
