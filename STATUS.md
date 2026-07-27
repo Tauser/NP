@@ -79,8 +79,9 @@ como entregue sem todos os critérios atendidos e este arquivo atualizado.**
     padrão inclusive no caminho de falha. `IHttpClient` recebe um
     `BoundedHttpBody` fornecido pelo worker, que exige 48 KiB e rejeita
     qualquer resposta maior com `kTooLarge`; ainda não há transporte ESP-IDF.
-    Host check e testes nativos passam em 2026-07-27; `idf.py build` após as
-    revisões de `core/` e `utils/` ainda não foi verificado.
+    Host check e testes nativos passam em 2026-07-27. `idf.py build` após as
+    revisões de `core/` e `utils/` passou em 2026-07-27, confirmado pelo
+    operador; não há flash ou validação de bancada dessas revisões.
 - **Gates**: `tools/scripts/` — `host_check`, `arch_check`, `size_check`,
   `ui_check`, `hygiene`, `check_all`.
 
