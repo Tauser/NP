@@ -90,7 +90,8 @@ Regras derivadas — **obrigatórias**:
    | Task | Pilha | Nota |
    |---|---|---|
    | `"lvgl"` (task de UI do adapter) | **16 KB (partida p/ medir)** — ver 2.1 | agora também renderiza (ADR-011) |
-   | `net_worker` | 8 KB | prioridade **abaixo** da task de UI |
+   | `net_worker` | 8 KB | prioridade 3, abaixo da task de UI (4) |
+   | `hosted_link` | 4 KB | sobe P4↔C6 uma vez, prioridade 3, termina em seguida |
    | `app_loop` | 8 KB | não renderiza mais; só wiring e tick |
 
    **Contrato de pilha de render:** a rotina de render **não copia
@@ -159,6 +160,15 @@ upgrade de `esp_lvgl_adapter`, BSP ou LVGL deve refazer esta medição, não her
 `use_psram = false`, então o **buffer de desenho parcial de 50 linhas
 (102.400 B ≈ 100 KiB) vive em SRAM interna** e é permanente. Isso sai do mesmo
 bolso que o handshake TLS (~130 KB internos, ADR-004) e que os limiares acima.
+
+**Rede da Onda A — estimativa antes da bancada (2026-07-27).** O
+`net_worker` reserva **48 KiB** em SRAM interna para o corpo HTTP e mais
+**8 KiB** de pilha; o handshake TLS continua transitório em aproximadamente
+**130 KiB** [herdado]. Com o display ativo, a linha de base medida é 296 KiB
+livres (§7.1), portanto a estimativa após reservar o corpo é 248 KiB antes do
+TLS. Isto **não é medição de HTTPS**: antes de habilitar qualquer provider é
+obrigatório registrar heap livre e maior bloco antes/durante/depois de um
+handshake real, e confirmar que permanece acima de 80 KiB em regime.
 
 **Consequência para a Onda B:** antes de ligar rede, medir o heap interno livre
 **com o display ativo** e confrontar com o teto de 48 KB de corpo HTTP (§2) e

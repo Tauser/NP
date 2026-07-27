@@ -29,7 +29,7 @@
 
 ```text
 Onda 0 - Atribuir o glitch de render                 [FECHADA — causa atribuída e corrigida]
-Onda A - Fundação: esqueleto, HAL, CI, render limpo  [em andamento — HAL, render, core/, utils/, orquestrador e contrato HTTP prontos; transporte/worker/providers/UI pendentes]
+Onda A - Fundação: esqueleto, HAL, CI, render limpo  [em andamento — HAL, render, core/, utils/, orquestrador, transporte/worker HTTP prontos; providers/ServiceManager/UI pendentes]
 Onda B - Dados reais, cache offline e degradação     [não iniciada]
 Onda C - Telas do produto                            [não iniciada]
 Onda D - Robustez comprovável e observabilidade      [não iniciada]
@@ -57,8 +57,8 @@ como entregue sem todos os critérios atendidos e este arquivo atualizado.**
     `double_buffer=false`, PPA 180°) e `MockBoard`. `lock_ui`/`lock_shared_i2c`
     compartilham o mesmo lock (invariante do §6 encapsulado só aqui).
     `board::assert_dma_safe` + `dma_check` puro (ADR-010).
-    **Escopo:** `start_network_transport_async()` e `audio()` do §4 estão
-    ADIADOS (sem rede/áudio na Onda 0, ADR-023).
+    **Escopo:** `start_network_transport_async()` agora sobe só o enlace P4↔C6
+    de forma assíncrona; associação Wi-Fi e áudio seguem adiados.
   - `components/diag/` — diagnóstico de boot (alvo/silício/PSRAM/heap;
     por draw buffer: base, tamanho, `%64`, `assert_dma_safe`, veredito 2.1);
     instrumentação permanente de render (flushes/update, duração p50/p95/máx,
@@ -71,8 +71,8 @@ como entregue sem todos os critérios atendidos e este arquivo atualizado.**
   - `components/core/` — `StateStore`, `EventBus`, `ActionQueue`,
     `UiDispatcher`, pump e `RequestOrchestrator` puro. O orquestrador entrega
     uma lease global por vez, com prioridade, intervalo, gap, backoff com
-    jitter injetado e breaker `Closed→Open→HalfOpen`; não há HTTP, worker ou
-    wiring de rede ainda. O `StateStore` agora recebe no wiring um mutex
+    jitter injetado e breaker `Closed→Open→HalfOpen`; o **core** não conhece
+    HTTP, worker nem wiring de rede. O `StateStore` agora recebe no wiring um mutex
     FreeRTOS próprio (`CoreMutex`), separado do lock da UI.
   - `components/utils/` — `Status` e `Result<T>` puros, sem exceções nem
     alocação dinâmica; `Result<T>` aceita tipos de domínio sem construtor
@@ -82,6 +82,17 @@ como entregue sem todos os critérios atendidos e este arquivo atualizado.**
     Host check e testes nativos passam em 2026-07-27. `idf.py build` após as
     revisões de `core/` e `utils/` passou em 2026-07-27, confirmado pelo
     operador; não há flash ou validação de bancada dessas revisões.
+  - `components/services/` — `NetworkWorker` host-testável recebe handlers
+    registrados no wiring, obtém uma lease do `RequestOrchestrator` e executa
+    no máximo uma chamada por vez; sua task alvo reserva 48 KiB de SRAM
+    interna, usa pilha de 8 KiB/prioridade 3 e registra heap antes/depois. O
+    transporte `EspHttpClient` aceita somente HTTPS e valida certificados pelo
+    bundle do ESP-IDF; ainda há **zero handlers/providers registrados**, logo
+    nenhum request é feito. O `WaveshareBoard` sobe o link P4↔C6 em tarefa
+    assíncrona de 4 KiB só após o primeiro frame/backlight; isso não associa
+    Wi-Fi nem afirma conectividade. `host_check --app --tests`, `arch_check`
+    e `size_check` passaram em 2026-07-27; `idf.py build` desta revisão e
+    validação de C6/heap/TLS em bancada **não foram executados**.
 - **Gates**: `tools/scripts/` — `host_check`, `arch_check`, `size_check`,
   `ui_check`, `hygiene`, `check_all`.
 
@@ -186,6 +197,13 @@ nunca isolaram **nem** o erase de flash (nº 1) **nem** o tearing de região
 atualizada (nº 2), porque nenhuma teve um experimento capaz de falsificá-las.
 
 ### NÃO verificado / em aberto
+
+- **Rede da Onda A:** o código de link ESP-Hosted, worker e transporte HTTPS
+  existe, mas a revisão ainda não foi compilada no alvo nem rodada em placa.
+  Faltam nesta ordem: boot com display ativo, enlace P4↔C6, heap interno
+  antes/durante/depois de handshake TLS, associação Wi-Fi provisionada, NTP e
+  uma chamada HTTPS validada. Sem provider/credenciais, esta revisão não tenta
+  associar Wi-Fi nem abrir socket.
 
 - **Defeito nº 2 CORRIGIDO + ROTAÇÃO 180° CORRETA, simultaneamente** —
   confirmado em bancada 2026-07-26 (ADR-026). Solução: **trocar o backend de

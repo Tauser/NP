@@ -22,6 +22,12 @@ public:
         return true;
     }
 
+    bool start_network_transport_async() override {
+        network_transport_ready_ = true;
+        return true;
+    }
+    bool network_transport_ready() const override { return network_transport_ready_; }
+
     bool lock_ui(uint32_t) override {
         ++ui_locks_;
         return true;
@@ -40,6 +46,7 @@ public:
 
     // Observáveis para os testes.
     bool display_ready_ = false;
+    bool network_transport_ready_ = false;
     int brightness_pct_ = -1;
     uint64_t rtc_s_ = 0;
     unsigned ui_locks_ = 0;

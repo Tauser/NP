@@ -5,6 +5,8 @@
 // Alvo-only (puxa LVGL/IDF). Não incluir no host_check.
 #pragma once
 
+#include <atomic>
+
 #include "board/i_board.hpp"
 
 struct _lv_display_t;  // fwd: evita puxar lvgl.h para quem só usa a interface
@@ -15,6 +17,8 @@ namespace board {
 class WaveshareBoard : public IBoard {
 public:
     bool init_display() override;
+    bool start_network_transport_async() override;
+    bool network_transport_ready() const override;
     bool lock_ui(uint32_t timeout_ms) override;
     void unlock_ui() override;
     bool lock_shared_i2c(uint32_t timeout_ms) override;
@@ -24,11 +28,18 @@ public:
     DrawBufferReport describe_draw_buffers() override;
 
 private:
+    static void network_transport_task(void* context);
+
     _lv_display_t* disp_ = nullptr;  // dono: esta board; lido só após init_display
     // Painel DPI, guardado para consultar os framebuffers que o DSI lê — a
     // verificação de DMA precisa cobrir TODOS eles (ADR-019), não só o buffer
     // que o LVGL está desenhando. `void*` para não puxar esp_lcd no header.
     void* panel_ = nullptr;
+    // Escritos exclusivamente pela tarefa de enlace e lidos pelo app_loop.
+    // Atômicos evitam atribuir ao estado de rede uma prontidão que ainda é só
+    // tentativa de inicialização do C6.
+    std::atomic<bool> transport_starting_{false};
+    std::atomic<bool> transport_ready_{false};
 };
 
 }  // namespace board

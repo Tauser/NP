@@ -11,4 +11,5 @@ idf_component_register(
         # esp_lv_adapter_*. Não confundir os dois.
         esp_lvgl_adapter
         esp32_p4_wifi6_touch_lcd_7b
+        esp_hosted
 )

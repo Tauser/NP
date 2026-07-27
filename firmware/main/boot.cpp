@@ -1,5 +1,6 @@
-// Fiação da Onda 0 (docs/ARCHITECTURE.md §3/§8). Monta board + diagnóstico +
-// instrumentação de render. SEM rede, NVS, cache ou tela de produto (ADR-023).
+// Fiação da Onda A (docs/ARCHITECTURE.md §3/§8). Monta board, diagnóstico,
+// worker de rede e instrumentação de render; ainda sem provider, NVS/cache ou
+// tela de produto.
 //
 // Ordem (§8): display → primeiro frame → backlight. O backlight só liga DEPOIS
 // do primeiro frame porque ligá-lo junto do display mostra tela branca no boot.
@@ -19,6 +20,9 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/semphr.h"
 #include "freertos/task.h"
+#include "services/esp_http_client.hpp"
+#include "services/network_worker.hpp"
+#include "services/network_worker_task.hpp"
 
 namespace nova {
 namespace app {
@@ -99,6 +103,24 @@ void backlight_after_first_frame(board::IBoard& board) {
     }
     board.set_brightness(kBootBrightnessPct);
 }
+
+#ifndef NOVA_TORTURE
+void start_network_transport(board::IBoard& board) {
+    if (!board.start_network_transport_async()) {
+        ESP_LOGE(kTag, "nao iniciou enlace ESP-Hosted; UI segue offline");
+    }
+}
+
+void start_network_worker(core::ILock& lock) {
+    static core::RequestOrchestrator requests(lock, 400);
+    static services::EspHttpClient http_client;
+    static services::NetworkWorker worker(requests, http_client);
+    static services::NetworkWorkerTask task(worker);
+    if (!task.start()) {
+        ESP_LOGE(kTag, "net_worker indisponivel; firmware permanece offline");
+    }
+}
+#endif
 }  // namespace
 
 void app_loop();  // definida abaixo; não retorna
@@ -121,7 +143,6 @@ void run() {
         ESP_LOGE(kTag, "init_display falhou — sem render nesta sessao");
         return;
     }
-
     // Diagnóstico de boot: endereços dos draw buffers, %64, DMA-safe e veredito
     // da hipótese 2.1 (GLITCH §2.1). Não interrompe o boot mesmo se DMA-unsafe:
     // um build de diagnóstico precisa continuar rodando para ser observado — o
@@ -132,6 +153,10 @@ void run() {
 
     setup_render(board, metrics);
     backlight_after_first_frame(board);
+
+#ifndef NOVA_TORTURE
+    start_network_transport(board);
+#endif
 
 #ifdef NOVA_FLASH_THRASH
     // Só depois do render estar rodando: religa UM subsistema (flash) por cima
@@ -156,11 +181,14 @@ void app_loop() {
     if (!bus.subscribe(core::UiDispatcher::on_event, &dispatcher)) {
         ESP_LOGE(kTag, "dispatcher nao assinou o EventBus — UI nao atualizaria");
     }
+#ifndef NOVA_TORTURE
+    start_network_worker(lock);
+#endif
 
     // Ainda NÃO há tela registrada: telas são da Onda C (ADR-023). O ciclo roda
     // vazio de propósito — o caminho está fechado e instrumentado, e a primeira
     // tela só precisa se registrar no dispatcher.
-    ESP_LOGI(kTag, "app_loop iniciada (0 telas registradas; ver ADR-023)");
+    ESP_LOGI(kTag, "app_loop iniciada (0 telas e 0 providers registrados)");
 
     for (;;) {
         const size_t invalidated = core::pump_once(store, bus, dispatcher);

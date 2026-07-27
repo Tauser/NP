@@ -20,6 +20,9 @@
 #include "esp_log.h"
 #include "esp_lv_adapter.h"
 #include "esp_lv_adapter_display.h"
+#include "esp_hosted.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 #include "lvgl.h"
 #include "sdkconfig.h"
 
@@ -77,7 +80,7 @@ constexpr uint32_t kUiTaskStackBytes = 16 * 1024;
 bool init_adapter() {
     esp_lv_adapter_config_t cfg = ESP_LV_ADAPTER_DEFAULT_CONFIG();
     cfg.task_stack_size = kUiTaskStackBytes;
-    cfg.task_priority = 4;  // net_worker (futuro) fica ABAIXO disto (§5.5)
+    cfg.task_priority = 4;  // net_worker fica abaixo desta prioridade (§5.5)
     if (esp_lv_adapter_init(&cfg) != ESP_OK) {
         ESP_LOGE(kTag, "esp_lv_adapter_init falhou");
         return false;
@@ -152,6 +155,38 @@ bool WaveshareBoard::init_display() {
         return false;
     }
     return true;
+}
+
+bool WaveshareBoard::start_network_transport_async() {
+    if (transport_ready_.load()) {
+        return true;
+    }
+    bool expected = false;
+    if (!transport_starting_.compare_exchange_strong(expected, true)) {
+        return true;
+    }
+    if (xTaskCreate(network_transport_task, "hosted_link", 4096, this, 3, nullptr) == pdPASS) {
+        return true;
+    }
+    transport_starting_.store(false);
+    ESP_LOGE(kTag, "nao criou task do enlace ESP-Hosted");
+    return false;
+}
+
+bool WaveshareBoard::network_transport_ready() const { return transport_ready_.load(); }
+
+void WaveshareBoard::network_transport_task(void* context) {
+    auto* board = static_cast<WaveshareBoard*>(context);
+    const int init_result = esp_hosted_init();
+    const int connect_result = init_result == ESP_OK ? esp_hosted_connect_to_slave() : init_result;
+    if (connect_result == ESP_OK) {
+        board->transport_ready_.store(true);
+        ESP_LOGI(kTag, "enlace P4<->C6 pronto; Wi-Fi ainda nao associado");
+    } else {
+        ESP_LOGE(kTag, "enlace ESP-Hosted falhou: %d", connect_result);
+    }
+    board->transport_starting_.store(false);
+    vTaskDelete(nullptr);
 }
 
 // lock_ui e lock_shared_i2c compartilham o MESMO lock por baixo: touch e codec

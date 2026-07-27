@@ -38,6 +38,12 @@ public:
     // false e o chamador decide a política de retry/reboot.
     virtual bool init_display() = 0;
 
+    // Sobe somente o enlace P4<->C6 em uma task própria. Não associa Wi-Fi,
+    // não faz NTP e não significa que há Internet: essas etapas dependem de
+    // credenciais provisionadas e serviços ainda ausentes.
+    virtual bool start_network_transport_async() = 0;
+    virtual bool network_transport_ready() const = 0;
+
     // Lock semântico do LVGL/display. `lock_shared_i2c` pode ser o MESMO lock
     // por baixo (touch e codec dividem o I2C, RESOURCE-BUDGET §6) — mas só a
     // WaveshareBoard sabe disso; o resto do sistema conhece o nome semântico.
@@ -53,9 +59,6 @@ public:
     // desenho), para o diagnóstico de alinhamento no boot (ADR-010/ADR-019).
     virtual DrawBufferReport describe_draw_buffers() = 0;
 
-    // NOTA DE ESCOPO (Onda 0): `start_network_transport_async()` e `audio()`
-    // do §4 estão ADIADOS — não há rede nem áudio nesta onda (ADR-023) e
-    // atribuir o glitch não precisa deles. Entram nas ondas A/posteriores.
 };
 
 }  // namespace board

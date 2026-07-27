@@ -48,6 +48,8 @@ CONFIG_LV_DRAW_BUF_STRIDE_ALIGN=64
 
 # ─── TLS ───────────────────────────────────────────────────────────────────
 CONFIG_MBEDTLS_DYNAMIC_BUFFER=y
+CONFIG_MBEDTLS_CERTIFICATE_BUNDLE=y
+CONFIG_MBEDTLS_CERTIFICATE_BUNDLE_DEFAULT_FULL=y
 # Handshake (~130 KB medido) fora da PSRAM: competir com o DMA do display na
 # PSRAM foi a causa raiz do "flash branco". RESOURCE-BUDGET.md §1.
 CONFIG_MBEDTLS_INTERNAL_MEM_ALLOC=y

@@ -8,5 +8,6 @@ idf_component_register(
         board
         core
         diag
+        services
         esp_lvgl_adapter
 )
