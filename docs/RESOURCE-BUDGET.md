@@ -125,16 +125,24 @@ nome **`"lvgl"`** (ADR-026), configurada com **16 KB** em
 (`uxTaskGetStackHighWaterMark`) é exposta no dump periódico de
 `diag/render_probe`.
 
-**A medição anterior (13.540 B livres / pico ≈ 2.844 B) está INVALIDADA.** Ela
-foi feita com o backend antigo (`esp_lvgl_port`, task `"taskLVGL"`), com outro
-pipeline de render. Após a troca de backend a sonda passou a procurar um nome de
-task que não existe mais e reportava `n/d` em silêncio — corrigido, mas **o
-número real ainda não foi medido**.
+**MEDIÇÃO VÁLIDA (2026-07-26, silício v1.3, backend `esp_lvgl_adapter`,
+perfil normal sem flags de diagnóstico, ~38 min / 2.304 updates):**
 
-**Portanto: valor da pilha da task de UI = NÃO DETERMINADO.** Continua
-bloqueando o fechamento da Onda A, e agora por dois motivos: falta medir no
-backend atual, e falta a "tela mais pesada" que o §2.1 exige (que ainda não
-existe). Regra inalterada: folga ≥ 2× sobre o pico medido.
+```text
+pilha alocada         16.384 B
+marca d'água livre    13.164 B   (estável durante toda a corrida)
+pico usado             3.220 B
+folga                    5,1×    (regra exige >= 2x)
+```
+
+**A medição anterior (13.540 B livres / pico ≈ 2.844 B) está INVALIDADA** — era
+do backend antigo (`esp_lvgl_port`, task `"taskLVGL"`), com outro pipeline. Fica
+registrada só como histórico.
+
+**Ressalva que se mantém:** o pico foi medido com o carimbo de diagnóstico, não
+com "a tela mais pesada" — que ainda não existe. O número é **piso**, suficiente
+para destravar a Onda A, e **deve ser refeito** quando houver view-model de
+produto (Onda C).
 
 **Lição registrada:** trocar de backend gráfico invalida medições de pilha. Um
 upgrade de `esp_lvgl_adapter`, BSP ou LVGL deve refazer esta medição, não herdá-la.
@@ -200,6 +208,29 @@ fetchers entram escalonados, **nunca simultâneos**.
 | Telas residentes simultâneas | SRAM interna | 4 | política de ciclo de vida |
 | Flushes por `update()` | banda MSPI | **4** | contador no callback de flush |
 | Duração de `update()` | CPU + banda | **16 ms** (p95) | instrumentação permanente |
+
+### 7.1 Linha de base medida (2026-07-26)
+
+Backend `esp_lvgl_adapter`, modo `TRIPLE_PARTIAL`, rotação 180°, perfil normal
+(sem flags de diagnóstico). Corrida de ~38 min / 2.304 updates a 1 Hz:
+
+| Métrica | Medido | Teto | Folga |
+|---|---|---|---|
+| Flushes por `update()` | **1** | 4 | 4× |
+| Duração p50 | **8,95 ms** | — | — |
+| Duração p95 | **9,25 ms** | 16 ms | 1,7× |
+| Duração máx | 18,9 ms | — | pico do 1º frame (tela cheia) |
+| Espera de flush | **4–5 µs** (máx 13 µs) | — | — |
+| Heap interno livre | 296 KB, estável | > 80 KB | — |
+| PSRAM livre | 29.159 KB, estável | — | 3,6 MB nos framebuffers |
+
+**Comparação com o backend anterior:** a espera de flush caiu de ~700 µs para
+**~5 µs** (duas ordens de grandeza) e os flushes por update de 3 para 1. A
+duração subiu um pouco (≈8,1 → 8,95 ms), o que é o custo do pipeline com
+rotação por PPA — troca claramente favorável.
+
+**Estabilidade:** heap interno e PSRAM permaneceram constantes durante toda a
+corrida; sem vazamento, sem degradação, sem reinício.
 
 O teto de widget por tela fica deliberadamente **em aberto**: a §8 exige
 número medido na entrega, e inventar um valor aqui violaria o próprio

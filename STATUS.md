@@ -202,17 +202,18 @@ atualizada (nº 2), porque nenhuma teve um experimento capaz de falsificá-las.
   **nunca esteve ativa** (`lv_display_set_rotation` jamais era chamado, o
   caminho do PPA era código morto); depois se tentou espelhamento por hardware,
   que o EK79007 **aceita e ignora** (ver `docs/HARDWARE.md`).
-- **Custo de render do modo `TRIPLE_PARTIAL` não medido.** Precisa entrar no
-  RESOURCE-BUDGET §7 antes de fechar a Onda A. PSRAM já contabilizada
-  (3 framebuffers = 3,6 MB) e o buffer de desenho de 100 KiB em SRAM interna
-  está declarado no §3.
-- **Pilha da task de UI: NÃO DETERMINADA.** A medição anterior foi invalidada
-  pela troca de backend (nome de task mudou de `"taskLVGL"` para `"lvgl"`; a
-  sonda reportava `n/d` em silêncio até ser corrigida). Bloqueia Onda A.
-- **Validação pendente do perfil normal:** o build validado em placa estava em
-  modo diagnóstico (`NOVA_CLARITY=ON`, `NOVA_SMALL_STAMP=ON`). Falta rodar com
-  ambos desligados, por alguns minutos, confirmando no log: 3 framebuffers,
-  rotação 180°, métricas de flush e marca d'água **real** da task `"lvgl"`.
+- ✅ **RESOLVIDO — perfil normal validado em placa** (2026-07-26): build sem
+  flags de diagnóstico, corrida de ~38 min / 2.304 updates. Confirmados no log:
+  3 framebuffers, rotação 180°, **4 buffers verificados e todos DMA-safe**
+  (3× 1.228.800 B em PSRAM + 102.400 B em SRAM interna), sem
+  `ledc: GPIO 32`, heap e PSRAM estáveis do início ao fim.
+- ✅ **RESOLVIDO — pilha da task de UI:** 13.164 B livres de 16.384 →
+  **pico 3.220 B, folga 5,1×** (RESOURCE-BUDGET §2.1). Ressalva: é **piso**,
+  medido no carimbo de diagnóstico e não na "tela mais pesada", que só existirá
+  na Onda C — refazer lá.
+- ✅ **RESOLVIDO — custo de render do `TRIPLE_PARTIAL`:** 1 flush/update
+  (teto 4), p95 = 9,25 ms (teto 16 ms), espera de flush ~5 µs. Registrado em
+  RESOURCE-BUDGET §7.1, com comparação contra o backend anterior.
 - **Defeito nº 1 (erase de flash) segue sem correção** — é limite de hardware
   (ADR-025), mitigado por política no RESOURCE-BUDGET §4.
 - ~~`W ledc: GPIO 32 is not usable`~~ — **explicado e corrigido**: era chamada
