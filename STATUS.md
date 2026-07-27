@@ -94,8 +94,10 @@ como entregue sem todos os critérios atendidos e este arquivo atualizado.**
     nenhum request é feito. O `WaveshareBoard` sobe o link P4↔C6 em tarefa
     assíncrona de 4 KiB só após o primeiro frame/backlight; isso não associa
     Wi-Fi nem afirma conectividade. `host_check --app --tests`, `arch_check`
-    e `size_check` passaram em 2026-07-27; `idf.py build` desta revisão e
-    validação de C6/heap/TLS em bancada **não foram executados**.
+    e `size_check` passaram em 2026-07-27. O operador tentou `idf.py build`
+    nesta revisão e ele parou em `esp_timer.h` por dependência ausente em
+    `services`; a correção declara `esp_timer` em `services` e `main`, mas o
+    novo build alvo e a validação de C6/heap/TLS em bancada **não foram executados**.
   - `components/providers/` — primeiro contrato por domínio, `ITimeProvider`,
     devolve `Result<UtcTime>` e o `MockTimeProvider` permite testar um futuro
     `ClockService` sem hardware ou rede. Não há adapter real, payload ou

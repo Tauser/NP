@@ -10,4 +10,5 @@ idf_component_register(
         diag
         services
         esp_lvgl_adapter
+        esp_timer
 )

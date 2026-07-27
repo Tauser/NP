@@ -11,5 +11,6 @@ idf_component_register(
         utils
         esp_http_client
         esp-tls
+        esp_timer
         mbedtls
 )

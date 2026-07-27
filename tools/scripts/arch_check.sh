@@ -44,7 +44,7 @@ assert_allowed ui        core models lvgl
 # services pode usar as bordas de rede do ESP-IDF, mas continua proibido de
 # depender de UI ou de adaptador concreto de provider. A lista explícita evita
 # que "serviço" vire passe livre para qualquer componente.
-assert_allowed services  core models cache providers utils board esp_http_client esp-tls mbedtls
+assert_allowed services  core models cache providers utils board esp_http_client esp-tls esp_timer mbedtls
 assert_allowed providers models utils
 assert_allowed core      models utils
 assert_allowed models
