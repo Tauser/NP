@@ -16,10 +16,10 @@
 | Item | Estado | Desde |
 |---|---|---|
 | Baseline vigente | **2026-07** | 2026-07-25 |
-| Onda atual | **Onda 0 — atribuição do glitch: CONCLUÍDA por atribuição** (dois defeitos nomeados; instrumentação entregue). Correções são tarefas da Onda A | 2026-07-26 |
+| Onda atual | **Onda A — Fundação** (em andamento). Onda 0 fechada: glitch atribuído e corrigido | 2026-07-26 |
 | Documentação | criada | 2026-07-25 |
 | Scaffolding (VSCode, IDF, gates, CI) | criado; `idf.py build` executado com sucesso (ESP-IDF v5.5.4) | 2026-07-26 |
-| Firmware | HAL mínima (`board/`) + diagnóstico de boot + instrumentação de render + modo torture (`diag/`); **compila, grava e boota** em placa v1.3 | 2026-07-26 |
+| Firmware | HAL (`board/`) + diagnóstico e instrumentação (`diag/`) + núcleo de estado/eventos/fila (`core/`, `models/`); **valida em placa v1.3**, render sem tearing e rotação correta | 2026-07-26 |
 | Hardware | validado; meses de operação contínua sem falha | herdado |
 | Glitch de render | **ATRIBUÍDO — causa-raiz única: DSI sem dados ao ler o framebuffer.** 3 vias: (a) erase de flash no MSPI → **sem correção** (chip não faz suspend) → política; (b) fetch de glyph em flash → mitigar por fonte/área; (c) framebuffer escrito enquanto lido → **CORRIGIDO** (esp_lvgl_adapter, ADR-026), com rotação 180° preservada. 2.1 (alinhamento) descartada | 2026-07-26 |
 | Build PROD validado | não | — |
@@ -28,8 +28,8 @@
 ## Ondas
 
 ```text
-Onda 0 - Atribuir o glitch de render                 [ATRIBUÍDA — 2 defeitos; correções na Onda A]
-Onda A - Fundação: esqueleto, HAL, CI, render limpo  [não iniciada]
+Onda 0 - Atribuir o glitch de render                 [FECHADA — causa atribuída e corrigida]
+Onda A - Fundação: esqueleto, HAL, CI, render limpo  [em andamento — HAL e render prontos; core/ iniciado]
 Onda B - Dados reais, cache offline e degradação     [não iniciada]
 Onda C - Telas do produto                            [não iniciada]
 Onda D - Robustez comprovável e observabilidade      [não iniciada]
@@ -242,14 +242,26 @@ Resumo do que é considerado **provado**:
 
 ## Dívidas e riscos abertos
 
-- **Glitch de render sem causa atribuída.** É o risco número um do produto e
-  bloqueia a Onda A. Cinco correções anteriores falharam (mbedTLS em SRAM
-  interna, `SPIRAM_MALLOC_ALWAYSINTERNAL`, prioridade do worker de rede,
-  `double_buffer=false`, filtro de `ClockChanged`). Hipóteses ranqueadas e
-  método de atribuição: `docs/GLITCH-PROTOCOLO.md`.
-- Nenhuma medição de render, heap ou banda foi feita **neste** baseline.
-  Todos os números citados na documentação vêm dos baselines anteriores e
-  estão marcados como herdados.
+- ~~Glitch de render sem causa atribuída~~ — **RESOLVIDO** (ADR-024/025/026).
+  Causa-raiz: o DSI fica sem dados ao ler o framebuffer. Duas das três vias
+  estão corrigidas; a terceira é limite de hardware, abaixo.
+- **Erase de flash provoca piscada branca — SEM CORREÇÃO POSSÍVEL.** O flash
+  desta placa (GD `0xC84019`) não implementa suspend, e num painel 24/7 não
+  existe janela sem render. **Cada escrita de flash em runtime custa uma
+  piscada.** Vira restrição dura do `RESOURCE-BUDGET.md` §4 (dedup de NVS,
+  cache no máximo 1×/30 min, nenhuma escrita disparada por toque). Toda feature
+  que escreva flash declara o custo em piscadas **antes** de entrar (ADR-009).
+  **Risco vivo para a Onda B**, quando cache e NVS passarem a existir.
+- **Fetch de glyph em flash também rouba banda do DSI** (RESOURCE-BUDGET §1.2).
+  Mitigação é disciplina de UI, não configuração: subsetting de fonte e
+  minimizar a área invalidada (o baseline anterior usava um label por dígito no
+  relógio). **Risco vivo para a Onda C.**
+- **`esp_lvgl_adapter` fixado em 0.5.3 com bug conhecido:** modos `DOUBLE_*`
+  não funcionam com rotação. Há `static_assert` impedindo a combinação, mas
+  qualquer upgrade do componente exige revalidação em bancada (ADR-026).
+- **Medições de render/pilha são pisos, não sizing final.** Foram feitas com o
+  carimbo de diagnóstico; a "tela mais pesada" só existirá na Onda C e obriga
+  a refazer a conta (RESOURCE-BUDGET §2.1).
 
 ## Histórico de fechamento de ondas
 
