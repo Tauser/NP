@@ -1,0 +1,5 @@
+# Fontes PURAS compiladas no host (tools/scripts/host_check.sh). Cada uma deve
+# compilar limpa com -Wall -Wextra -Werror sem ESP-IDF. Só lógica sem hardware.
+components/board/src/dma_safety.cpp
+components/diag/src/render_metrics.cpp
+components/diag/src/boot_report.cpp
