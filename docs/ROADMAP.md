@@ -1,7 +1,9 @@
 # NovaPanel — Roadmap
 
 > Define **entregas** e **critérios de saída**. O andamento é marcado
-> exclusivamente em `STATUS.md`.
+> exclusivamente em `STATUS.md`. Itens já absorvidos pelo baseline aparecem
+> explicitamente para não voltarem ao planejamento; a evidência e o estado
+> verificável continuam sendo o `STATUS.md`.
 >
 > Numeração própria por **ondas** (A, B, …), deliberadamente diferente das
 > "fases" dos baselines anteriores — citar numeração antiga é proibido, foi
@@ -100,12 +102,16 @@ que é exatamente a situação de hoje.
 
 ## Onda A — Fundação
 
-**Entregas.** Esqueleto de componentes; `core/` (estado, eventos,
-despachante, orquestrador, fila com overflow contado); `models/`; `utils/`
-(`Result<T>`, cliente HTTP com teto-como-falha); **HAL** (`IBoard`,
-`MockBoard`, `WaveshareBoard` mínima: display, locks, brilho, RTC);
-interfaces de provider; registro de telas vazio; `main/` só wiring;
-tabela de partições A/B completa; gates estáticos e CI de host.
+**Base já absorvida no baseline (não replanejar).** Esqueleto de componentes;
+`models/`; **HAL** (`IBoard`, `MockBoard`, `WaveshareBoard` mínima: display,
+locks, brilho e RTC); tabela de partições A/B; gates estáticos e workflow de
+CI; `main/` como wiring. O núcleo entregue contém `StateStore`, `EventBus`,
+`ActionQueue` com overflow contado, `UiDispatcher` e pump de eventos; `utils/`
+contém `Status` e `Result<T>` (inclusive para tipos sem construtor padrão).
+
+**Entregas restantes.** `RequestOrchestrator` e `ServiceManager`; cliente HTTP
+com teto tratado como falha; interfaces de provider; registro de telas vazio e
+shell de UI. A Onda A continua aberta até cumprir todos os critérios abaixo.
 
 **Critérios de saída**
 

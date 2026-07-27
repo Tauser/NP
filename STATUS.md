@@ -19,7 +19,7 @@
 | Onda atual | **Onda A — Fundação** (em andamento). Onda 0 fechada: glitch atribuído e corrigido | 2026-07-26 |
 | Documentação | criada | 2026-07-25 |
 | Scaffolding (VSCode, IDF, gates, CI) | criado; `idf.py build` executado com sucesso (ESP-IDF v5.5.4) | 2026-07-26 |
-| Firmware | HAL (`board/`) + diagnóstico e instrumentação (`diag/`) + núcleo de estado/eventos/fila (`core/`, `models/`); **valida em placa v1.3**, render sem tearing e rotação correta | 2026-07-26 |
+| Firmware | HAL (`board/`) + diagnóstico e instrumentação (`diag/`) + núcleo de estado/eventos/fila/dispatcher (`core/`, `models/`) + `utils/`; **valida em placa v1.3**, render sem tearing e rotação correta | 2026-07-27 |
 | Hardware | validado; meses de operação contínua sem falha | herdado |
 | Glitch de render | **ATRIBUÍDO — causa-raiz única: DSI sem dados ao ler o framebuffer.** 3 vias: (a) erase de flash no MSPI → **sem correção** (chip não faz suspend) → política; (b) fetch de glyph em flash → mitigar por fonte/área; (c) framebuffer escrito enquanto lido → **CORRIGIDO** (esp_lvgl_adapter, ADR-026), com rotação 180° preservada. 2.1 (alinhamento) descartada | 2026-07-26 |
 | Build PROD validado | não | — |
@@ -29,7 +29,7 @@
 
 ```text
 Onda 0 - Atribuir o glitch de render                 [FECHADA — causa atribuída e corrigida]
-Onda A - Fundação: esqueleto, HAL, CI, render limpo  [em andamento — HAL e render prontos; core/ iniciado]
+Onda A - Fundação: esqueleto, HAL, CI, render limpo  [em andamento — HAL, render, core/ e utils/ prontos; orquestrador/UI pendentes]
 Onda B - Dados reais, cache offline e degradação     [não iniciada]
 Onda C - Telas do produto                            [não iniciada]
 Onda D - Robustez comprovável e observabilidade      [não iniciada]
