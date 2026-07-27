@@ -1,0 +1,41 @@
+# --- build do ESP-IDF ---
+build/
+firmware/build/
+sdkconfig
+sdkconfig.old
+sdkconfig.ci
+# sdkconfig.defaults É versionado: carrega as receitas de plataforma
+# do docs/PATRIMONIO-TECNICO.md §1. Não adicionar aqui.
+
+# Componentes gerenciados: a fonte da verdade é o dependencies.lock,
+# que É versionado (docs/SECURITY.md §3).
+managed_components/
+firmware/managed_components/
+
+# --- ferramentas ---
+.cache/
+compile_commands.json
+*.pyc
+__pycache__/
+.venv/
+
+# --- artefatos de bancada ---
+*.coredump
+*.elf.map
+logs/
+captures/
+
+# --- segredos: nunca, em hipótese alguma ---
+*.pem
+*.key
+secure_boot_signing_key*
+flash_encryption_key*
+nvs_keys.bin
+credentials*.json
+
+# --- SO / editor ---
+.DS_Store
+Thumbs.db
+*.swp
+*~
+.idea/

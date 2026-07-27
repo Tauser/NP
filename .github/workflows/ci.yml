@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  gates:
+    name: Gates (estáticos + host)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Gates estáticos e host_check
+        run: bash tools/scripts/check_all.sh
+
+  build:
+    name: Build no alvo (esp32p4)
+    runs-on: ubuntu-latest
+    # Roda só quando já existir componente de firmware; antes da Onda A o
+    # projeto é documentação e scaffolding, e um build vazio não prova nada.
+    if: hashFiles('firmware/components/**/CMakeLists.txt') != ''
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: idf.py build
+        uses: espressif/esp-idf-ci-action@v1
+        with:
+          esp_idf_version: v5.5.4
+          target: esp32p4
+          path: firmware

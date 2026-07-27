@@ -1,0 +1,12 @@
+{
+  "recommendations": [
+    "espressif.esp-idf-extension",
+    "llvm-vs-code-extensions.vscode-clangd",
+    "timonwong.shellcheck",
+    "editorconfig.editorconfig"
+  ],
+  // A extensao C/C++ da Microsoft conflita com o clangd: duas engines de
+  // IntelliSense sobre o mesmo codigo, com resultados divergentes. Este
+  // projeto usa clangd, que le o compile_commands.json real do IDF.
+  "unwantedRecommendations": ["ms-vscode.cpptools"]
+}

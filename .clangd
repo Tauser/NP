@@ -1,0 +1,28 @@
+# O clangd lê o compile_commands.json gerado pelo IDF, que traz flags do
+# GCC riscv32 que o clang não conhece. Remover em vez de deixar o clangd
+# falhar o arquivo inteiro.
+CompileFlags:
+  Remove:
+    - -f*
+    - -m*
+    - --param*
+  Add:
+    - -Wno-unknown-warning-option
+
+Diagnostics:
+  UnusedIncludes: Strict
+  ClangTidy:
+    Add:
+      - bugprone-*
+      - performance-*
+      - readability-function-size
+      - readability-braces-around-statements
+    Remove:
+      # Ruidosos demais em código de firmware sobre API C.
+      - bugprone-easily-swappable-parameters
+      - readability-magic-numbers
+    CheckOptions:
+      # Espelha os limites do docs/ARCHITECTURE.md §11.
+      readability-function-size.LineThreshold: 40
+      readability-function-size.ParameterThreshold: 5
+      readability-function-size.NestingThreshold: 3

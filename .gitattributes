@@ -1,0 +1,33 @@
+# Normaliza quebra de linha na entrada do repositório.
+#
+# Existe por causa de um problema real: sem isto, ferramentas diferentes
+# (editor no Windows, agente em container Linux) reescrevem arquivos inteiros
+# só trocando CRLF por LF, e um commit de 3 linhas aparece como 700 linhas
+# alteradas. Isso já escondeu mudança real dentro de ruído.
+#
+# Regra: LF no repositório para tudo que é texto. O checkout no Windows
+# continua funcionando; o Git converte na saída conforme core.autocrlf.
+
+* text=auto eol=lf
+
+# Scripts precisam de LF mesmo no Windows (rodam em bash/CI Linux).
+*.sh   text eol=lf
+*.py   text eol=lf
+
+# Arquivos que o Windows exige com CRLF.
+*.bat  text eol=crlf
+*.cmd  text eol=crlf
+
+# Binários: nunca converter, nunca tentar diff textual.
+*.png  binary
+*.jpg  binary
+*.ico  binary
+*.bin  binary
+*.elf  binary
+*.a    binary
+*.o    binary
+*.ttf  binary
+*.otf  binary
+
+# SVG é texto e vale diff.
+*.svg  text eol=lf

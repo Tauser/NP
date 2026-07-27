@@ -1,0 +1,46 @@
+{
+  // PONTO DE ENTRADA DO PROJETO — abra ESTE arquivo no VSCode
+  // ("File > Open Workspace from File..."), nao a pasta.
+  //
+  // Motivo: a extensao ESP-IDF trata a pasta aberta como raiz do projeto e
+  // procura CMakeLists.txt nela. Aqui o projeto IDF e firmware/, nao o
+  // repositorio (que tambem guarda docs/, design/ e tools/). Declarar as
+  // duas pastas resolve isso: a extensao opera sobre "firmware (ESP-IDF)",
+  // e "NovaPanel (repo)" serve para documentacao e gates.
+  "folders": [
+    {
+      "name": "firmware (ESP-IDF)",
+      "path": "firmware"
+    },
+    {
+      "name": "NovaPanel (repo)",
+      "path": "."
+    }
+  ],
+
+  "settings": {
+    // Vale para as duas pastas. O que e especifico do IDF vive em
+    // firmware/.vscode/settings.json; o que e de editor, em .vscode/.
+    "files.encoding": "utf8",
+    "files.eol": "\n",
+    "files.insertFinalNewline": true,
+    "files.trimTrailingWhitespace": true,
+    "editor.rulers": [88],
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true,
+    "editor.detectIndentation": false,
+    "C_Cpp.intelliSenseEngine": "disabled"
+  },
+
+  "extensions": {
+    "recommendations": [
+      "espressif.esp-idf-extension",
+      "llvm-vs-code-extensions.vscode-clangd",
+      "timonwong.shellcheck",
+      "editorconfig.editorconfig"
+    ],
+    // cpptools conflita com clangd: duas engines de IntelliSense sobre o
+    // mesmo codigo, com resultados divergentes.
+    "unwantedRecommendations": ["ms-vscode.cpptools"]
+  }
+}

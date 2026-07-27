@@ -1,0 +1,58 @@
+{
+  // Configuracao do EDITOR para o repositorio.
+  // As configuracoes do ESP-IDF vivem em firmware/.vscode/settings.json,
+  // porque e la que esta o projeto IDF. Nao duplicar idf.* aqui: em
+  // workspace multi-root, ${workspaceFolder} fica ambiguo e a extensao
+  // passa a apontar para a pasta errada.
+
+  // ---- clangd: IntelliSense real, do compile_commands.json do IDF ----
+  // Gerado em firmware/build no primeiro `idf.py build`. Antes disso o
+  // clangd nao tem o que indexar -- e esperado, nao e erro.
+  "clangd.path": "C:\\Espressif\\tools\\esp-clang\\esp-20.1.1_20250829\\esp-clang\\bin\\clangd.exe",
+  "clangd.arguments": [
+    "--background-index",
+    "--query-driver=**",
+    "--compile-commands-dir=${workspaceFolder}/firmware/build",
+    "--header-insertion=never",
+    "--clang-tidy"
+  ],
+  "C_Cpp.intelliSenseEngine": "disabled",
+
+  // ---- editor ----
+  "files.encoding": "utf8",
+  "files.eol": "\n",
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+  "editor.rulers": [88],
+  "editor.tabSize": 4,
+  "editor.insertSpaces": true,
+  "editor.detectIndentation": false,
+
+  "[markdown]": {
+    "editor.rulers": [80],
+    "files.trimTrailingWhitespace": false
+  },
+  "[shellscript]": { "files.eol": "\n" },
+
+  "files.exclude": {
+    // firmware/ e uma pasta do workspace por si so (ver
+    // NovaPanel.code-workspace); escondê-la aqui evita a arvore duplicada
+    // que o multi-root produz quando uma pasta esta dentro da outra.
+    "firmware": true,
+    "**/build": true,
+    "**/managed_components": true,
+    "**/.cache": true,
+    "**/__pycache__": true
+  },
+  "search.exclude": {
+    "**/build": true,
+    "**/managed_components": true,
+    "**/dependencies.lock": true,
+    "**/design/v5/images": true
+  },
+  "files.associations": {
+    "*.h": "c",
+    "*.hpp": "cpp",
+    "sdkconfig.defaults": "properties"
+  }
+}
