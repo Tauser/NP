@@ -1,16 +1,22 @@
-// WaveshareBoard: display real via BSP + esp_lvgl_port, com a receita de
+// WaveshareBoard: display real via BSP + esp_lvgl_adapter, com a receita de
 // plataforma paga em bancada (RESOURCE-BUDGET §2, docs/PATRIMONIO-TECNICO.md).
 //
-// Receita fixada aqui:
-//   - draw buffer parcial de 60 linhas em PSRAM (buff_spiram=true) — é a
-//     origem de DMA que a hipótese 2.1 do glitch acusa (GLITCH-PROTOCOLO §2.1);
-//   - double_buffer=false (RESOURCE-BUDGET §2.5);
-//   - rotação 180° por PPA (sw_rotate=true);
+// Receita vigente (ADR-026), validada em placa em 2026-07-26:
+//   - backend de display: esp_lvgl_adapter (NÃO esp_lvgl_port, que não combina
+//     sw_rotate com full_refresh e por isso obrigava a escolher entre rotação e
+//     ausência de tearing);
+//   - modo TRIPLE_PARTIAL: 3 framebuffers lidos pelo DSI + buffer de desenho
+//     parcial de 50 linhas;
+//   - rotação 180° pelo pipeline do adapter (o EK79007 ignora MADCTL, e
+//     esp_lcd_panel_swap_xy não é suportado neste painel);
 //   - RGB565 (CONFIG_LV_COLOR_DEPTH_16).
+//
+// O BSP continua criando o painel DSI; só o backend de LVGL mudou.
 #include "board/waveshare_board.hpp"
 
 #include "bsp/display.h"
 #include "bsp/esp-bsp.h"
+#include "esp_lcd_mipi_dsi.h"
 #include "esp_log.h"
 #include "esp_lv_adapter.h"
 #include "esp_lv_adapter_display.h"
@@ -29,6 +35,9 @@ constexpr const char* kTag = "board.ws";
 // full_refresh). Ver ADR-026.
 constexpr esp_lv_adapter_rotation_t kRotation = ESP_LV_ADAPTER_ROTATE_180;
 
+// RGB565 (CONFIG_LV_COLOR_DEPTH_16).
+constexpr size_t kBytesPerPixel = 2;
+
 // TRIPLE_PARTIAL: é o DEFAULT do adapter para MIPI-DSI
 // (ESP_LV_ADAPTER_TEAR_AVOID_MODE_DEFAULT_MIPI_DSI), ou seja, o caminho testado.
 //
@@ -41,6 +50,17 @@ constexpr esp_lv_adapter_rotation_t kRotation = ESP_LV_ADAPTER_ROTATE_180;
 // TRIPLE_PARTIAL pede 3 buffers de verdade e usa caminho de render parcial.
 constexpr esp_lv_adapter_tear_avoid_mode_t kTearMode =
     ESP_LV_ADAPTER_TEAR_AVOID_MODE_TRIPLE_PARTIAL;
+
+// Guarda de compilação: no adapter 0.5.3 os modos DOUBLE_* são incompatíveis com
+// rotação (ADR-026) e a falha aparece só em runtime, como task watchdog. Falhar
+// aqui é barato; descobrir na bancada custou dois reflashes.
+// Um upgrade do componente DEVE revalidar isto em placa antes de relaxar.
+static_assert(kRotation == ESP_LV_ADAPTER_ROTATE_0 ||
+                  (kTearMode != ESP_LV_ADAPTER_TEAR_AVOID_MODE_DOUBLE_DIRECT &&
+                   kTearMode != ESP_LV_ADAPTER_TEAR_AVOID_MODE_DOUBLE_FULL &&
+                   kTearMode != ESP_LV_ADAPTER_TEAR_AVOID_MODE_DOUBLE_PARTIAL),
+              "adapter 0.5.3: modos DOUBLE_* nao funcionam com rotacao != 0 "
+              "(ver ADR-026); use TRIPLE_PARTIAL");
 
 // Pilha da task do adapter: 16 KB é PONTO DE PARTIDA para medir a marca d'água
 // (RESOURCE-BUDGET §2.1), não número confirmado.
@@ -113,9 +133,13 @@ bool WaveshareBoard::init_display() {
         ESP_LOGE(kTag, "bsp_display_new_with_handles falhou");
         return false;
     }
-    if (bsp_display_brightness_init() != ESP_OK) {
-        ESP_LOGW(kTag, "brightness_init falhou; backlight seguira travado");
-    }
+    // NÃO chamar bsp_display_brightness_init() aqui: o próprio
+    // bsp_display_new_with_handles() já o chama internamente
+    // (esp32_p4_wifi6_touch_lcd_7b.c:416). A chamada duplicada reconfigurava o
+    // canal LEDC e era a origem do aviso `ledc: GPIO 32 is not usable` que
+    // aparecia em TODO boot — ruído que chegou a ser confundido com evidência
+    // da hipótese 2.2 (backlight) do GLITCH-PROTOCOLO.
+    panel_ = h.panel;
     disp_ = add_display(h);
     if (disp_ == nullptr) {
         ESP_LOGE(kTag, "esp_lv_adapter_register_display falhou");
@@ -159,16 +183,38 @@ uint64_t WaveshareBoard::rtc_unix_time_s() {
 
 DrawBufferReport WaveshareBoard::describe_draw_buffers() {
     DrawBufferReport rep;
-    if (disp_ == nullptr) {
-        return rep;
+
+    // (1) Os TRÊS framebuffers que o DSI lê continuamente. São eles que a
+    // ADR-019 manda verificar: um framebuffer desalinhado é lido por DMA a
+    // 73,7 MB/s, e o defeito apareceria como artefato intermitente, não como
+    // erro. Consultar só o buffer ativo do LVGL cobriria 1 de 3.
+    if (panel_ != nullptr) {
+        void* fb[3] = {nullptr, nullptr, nullptr};
+        const size_t fb_size =
+            static_cast<size_t>(BSP_LCD_H_RES) * BSP_LCD_V_RES * kBytesPerPixel;
+        if (esp_lcd_dpi_panel_get_frame_buffer(
+                static_cast<esp_lcd_panel_handle_t>(panel_), 3, &fb[0], &fb[1], &fb[2]) == ESP_OK) {
+            for (void* p : fb) {
+                if (p != nullptr && rep.count_ < DrawBufferReport::kMaxBuffers) {
+                    rep.buffers_[rep.count_].base_ = reinterpret_cast<uintptr_t>(p);
+                    rep.buffers_[rep.count_].size_ = fb_size;
+                    ++rep.count_;
+                }
+            }
+        } else {
+            ESP_LOGW(kTag, "nao foi possivel ler os framebuffers do painel");
+        }
     }
-    // Lido via API pública do LVGL, sem header privado. Com o adapter, o buffer
-    // ativo é um dos framebuffers do painel (tamanho de tela cheia).
-    lv_draw_buf_t* b = lv_display_get_buf_active(disp_);
-    if (b != nullptr && b->data != nullptr) {
-        rep.buffers_[0].base_ = reinterpret_cast<uintptr_t>(b->data);
-        rep.buffers_[0].size_ = b->data_size;
-        rep.count_ = 1;
+
+    // (2) O buffer de desenho parcial do LVGL (origem do blit para o
+    // framebuffer). Lido via API pública, sem header privado.
+    if (disp_ != nullptr && rep.count_ < DrawBufferReport::kMaxBuffers) {
+        lv_draw_buf_t* b = lv_display_get_buf_active(disp_);
+        if (b != nullptr && b->data != nullptr) {
+            rep.buffers_[rep.count_].base_ = reinterpret_cast<uintptr_t>(b->data);
+            rep.buffers_[rep.count_].size_ = b->data_size;
+            ++rep.count_;
+        }
     }
     return rep;
 }

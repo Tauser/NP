@@ -1,6 +1,6 @@
 // WaveshareBoard: IBoard real sobre o BSP esp32_p4_wifi6_touch_lcd_7b e o
-// esp_lvgl_port. É o ÚNICO lugar que conhece a coincidência física "lock do
-// display == mutex do I2C compartilhado" (RESOURCE-BUDGET §6).
+// esp_lvgl_adapter (ADR-026). É o ÚNICO lugar que conhece a coincidência física
+// "lock do display == mutex do I2C compartilhado" (RESOURCE-BUDGET §6).
 //
 // Alvo-only (puxa LVGL/IDF). Não incluir no host_check.
 #pragma once
@@ -25,6 +25,10 @@ public:
 
 private:
     _lv_display_t* disp_ = nullptr;  // dono: esta board; lido só após init_display
+    // Painel DPI, guardado para consultar os framebuffers que o DSI lê — a
+    // verificação de DMA precisa cobrir TODOS eles (ADR-019), não só o buffer
+    // que o LVGL está desenhando. `void*` para não puxar esp_lcd no header.
+    void* panel_ = nullptr;
 };
 
 }  // namespace board

@@ -19,11 +19,14 @@ struct DrawBufferInfo {
     size_t size_ = 0;     // bytes
 };
 
-// Com a receita da plataforma (double_buffer=false, RESOURCE-BUDGET §2.5) há
-// um único draw buffer. O segundo slot existe só para não mentir sobre a
-// forma quando alguém habilitar double buffer no futuro.
+// TODOS os buffers que o periférico lê precisam ser verificados, não só o que o
+// LVGL está desenhando no momento: a ADR-019 exige "buffers de DMA desalinhados
+// detectados no boot" como contador de gate. Com a receita vigente
+// (esp_lvgl_adapter, TRIPLE_PARTIAL) são 3 framebuffers lidos pelo DSI mais o
+// buffer parcial de desenho — por isso 4 slots.
 struct DrawBufferReport {
-    DrawBufferInfo buffers_[2];
+    static constexpr size_t kMaxBuffers = 4;
+    DrawBufferInfo buffers_[kMaxBuffers];
     size_t count_ = 0;
 };
 
@@ -46,8 +49,8 @@ public:
     virtual void set_brightness(int pct) = 0;
     virtual uint64_t rtc_unix_time_s() = 0;
 
-    // Lê de volta os draw buffers que o esp_lvgl_port alocou, para o
-    // diagnóstico de alinhamento (via API pública do LVGL na impl. real).
+    // Lê de volta os buffers lidos por DMA (framebuffers do painel + buffer de
+    // desenho), para o diagnóstico de alinhamento no boot (ADR-010/ADR-019).
     virtual DrawBufferReport describe_draw_buffers() = 0;
 
     // NOTA DE ESCOPO (Onda 0): `start_network_transport_async()` e `audio()`
