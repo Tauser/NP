@@ -98,9 +98,24 @@ void spy_handler(nova::models::Event e, void* ctx) {
     s->last_ = e;
 }
 
-// Handler que LÊ o estado durante o despacho. Se o StateStore publicasse com o
-// lock na mão, isto travaria (o lock do alvo não é recursivo). Prova a ordem
-// "mutar sob lock -> liberar -> publicar".
+// Simula o que a `app_loop` faz no tick: drena a máscara e publica cada bit.
+// É o ÚNICO ponto do sistema que chama publish().
+size_t drain_and_publish(nova::core::StateStore& st, nova::core::EventBus& bus) {
+    using namespace nova::models;
+    const EventMask m = st.take_pending_events();
+    size_t published = 0;
+    for (uint8_t i = 0; i < kEventCount; ++i) {
+        const Event e = static_cast<Event>(i);
+        if ((m & mask_of(e)) != 0) {
+            bus.publish(e);
+            ++published;
+        }
+    }
+    return published;
+}
+
+// Handler que LÊ o estado durante o despacho. Como a publicação acontece fora
+// de qualquer região crítica do StateStore, isto não pode aninhar lock.
 nova::core::StateStore* g_store_for_reentrancy = nullptr;
 void reading_handler(nova::models::Event, void*) {
     if (g_store_for_reentrancy != nullptr) {
@@ -114,35 +129,31 @@ void test_state_store() {
     core::EventBus bus;
     g_spy = Spy{};
     bus.subscribe(spy_handler, &g_spy);
-    core::StateStore st(lk, &bus);
+    core::StateStore st(lk);
 
-    // set_clock: estado correto + evento correto.
+    // set_clock: estado correto + fato registrado, mas SEM publicar sozinho.
     check(st.set_clock(10, 30, true), "set_clock com valor novo => true");
-    check(g_spy.count_ == 1, "set_clock publicou 1 evento");
+    check(g_spy.count_ == 0, "setter NAO publica sozinho (so a app_loop publica)");
+    check(drain_and_publish(st, bus) == 1, "drenagem publicou 1 evento");
     check(g_spy.last_ == models::Event::kClockChanged, "evento publicado e ClockChanged");
 
-    // Valor idêntico: NÃO muta e NÃO publica.
+    // Valor idêntico: NÃO muta e NÃO registra fato — nada a drenar.
     check(!st.set_clock(10, 30, true), "set_clock com valor IGUAL => false");
-    check(g_spy.count_ == 1, "valor igual NAO publicou evento (dedup)");
+    check(drain_and_publish(st, bus) == 0, "valor igual NAO gerou evento (dedup)");
+    check(g_spy.count_ == 1, "contagem de eventos inalterada");
 
     check(st.set_clock(10, 31, true), "set_clock com minuto novo => true");
-    check(g_spy.count_ == 2, "mudanca real publicou de novo");
+    check(drain_and_publish(st, bus) == 1, "mudanca real gerou evento de novo");
     models::ClockState c = st.clock();
     check(c.hour_ == 10 && c.minute_ == 31 && c.valid_, "clock() devolve o valor gravado");
 
     // set_network: mesmo contrato, evento próprio.
     check(st.set_network(models::NetworkState::kUp), "set_network novo => true");
-    check(g_spy.count_ == 3 && g_spy.last_ == models::Event::kNetworkChanged,
-          "set_network publicou NetworkChanged");
+    check(drain_and_publish(st, bus) == 1, "set_network gerou 1 evento");
+    check(g_spy.last_ == models::Event::kNetworkChanged, "evento e NetworkChanged");
     check(!st.set_network(models::NetworkState::kUp), "set_network igual => false");
-    check(g_spy.count_ == 3, "set_network igual NAO publicou");
+    check(drain_and_publish(st, bus) == 0, "set_network igual NAO gerou evento");
     check(st.network() == models::NetworkState::kUp, "network() devolve o valor");
-
-    // Sem bus: continua mutando, sem publicar e sem estourar.
-    CountingLock lk2;
-    core::StateStore no_bus(lk2, nullptr);
-    check(no_bus.set_clock(1, 2, true), "set_clock funciona sem EventBus");
-    check(no_bus.clock().hour_ == 1, "estado gravado sem EventBus");
 
     // Prova que os acessores serializam e não vazam lock.
     check(lk.locks_ == lk.unlocks_, "todo lock teve unlock (sem vazamento)");
@@ -151,19 +162,48 @@ void test_state_store() {
     check(lk.reentrant_ == 0, "nenhum lock aninhado (seria deadlock no alvo)");
 }
 
-// Prova a ORDEM: publicar acontece com o lock JÁ liberado, senão um handler que
-// lê o estado aninharia o lock.
+// COALESCING: é o ganho de mover a publicação para a drenagem. Muitas mutações
+// entre dois ticks viram UM evento por tipo — não N. Ataca direto o custo de
+// banda MSPI (RESOURCE-BUDGET §1.1).
+void test_coalescing() {
+    using namespace nova;
+    CountingLock lk;
+    core::EventBus bus;
+    g_spy = Spy{};
+    bus.subscribe(spy_handler, &g_spy);
+    core::StateStore st(lk);
+
+    for (uint8_t m = 0; m < 20; ++m) {
+        st.set_clock(9, m, true);  // 20 mutações REAIS, todas diferentes
+    }
+    check(drain_and_publish(st, bus) == 1, "20 mutacoes de relogio => 1 evento");
+    check(g_spy.count_ == 1, "handler chamado uma unica vez");
+    check(st.clock().minute_ == 19, "estado reflete a ULTIMA mutacao");
+
+    // Dois domínios distintos coalescem separadamente: 1 evento cada.
+    // (kUp difere do default kDown; usar kDown aqui seria um não-evento.)
+    st.set_clock(10, 0, true);
+    st.set_network(models::NetworkState::kUp);
+    check(drain_and_publish(st, bus) == 2, "dominios distintos => 1 evento cada");
+
+    // Drenar de novo sem mutar: nada pendente.
+    check(drain_and_publish(st, bus) == 0, "drenagem apos drenagem nao repete evento");
+}
+
+// A publicação acontece fora de qualquer região crítica do StateStore, então um
+// handler pode ler o estado sem aninhar lock.
 void test_publish_outside_lock() {
     using namespace nova;
     CountingLock lk;
     core::EventBus bus;
-    core::StateStore st(lk, &bus);
+    core::StateStore st(lk);
     g_store_for_reentrancy = &st;
     bus.subscribe(reading_handler, nullptr);
 
     st.set_clock(7, 45, true);
+    drain_and_publish(st, bus);
 
-    check(lk.reentrant_ == 0, "handler leu o estado SEM aninhar lock (publish fora da secao critica)");
+    check(lk.reentrant_ == 0, "handler leu o estado SEM aninhar lock");
     check(lk.locks_ == lk.unlocks_, "locks balanceados apos publish com leitura no handler");
     g_store_for_reentrancy = nullptr;
 }
@@ -227,6 +267,7 @@ int main() {
     std::printf("core tests:\n");
     test_event_bus();
     test_state_store();
+    test_coalescing();
     test_publish_outside_lock();
     test_action_queue();
     test_event_mask();

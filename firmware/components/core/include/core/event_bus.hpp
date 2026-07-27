@@ -1,10 +1,24 @@
 // EventBus — publicação SÍNCRONA de fatos de domínio
 // (docs/ARCHITECTURE.md §5 regra 2, ADR-006).
 //
-// PROPRIEDADE (ADR-008): esta classe NÃO é thread-safe por si. O handler roda
-// na task de QUEM PUBLICOU, imediatamente, sem fila e sem troca de contexto.
-// Quem publica de outra task deve fazê-lo sob o mesmo lock que protege os
-// assinantes, ou publicar via ActionQueue e deixar a `app_loop` publicar aqui.
+// PROPRIEDADE (ADR-008) — REGRA DURA:
+//
+//   **Só a `app_loop` chama `publish()`.** Esta classe NÃO é thread-safe e não
+//   tem lock: `dispatching_`, os contadores e a lista de assinantes seriam
+//   corridos por publicações concorrentes, e a ORDEM dos eventos poderia
+//   inverter. A tabela do ARCHITECTURE §5 já designa a `app_loop` como dona do
+//   despacho de UI; aqui isso deixa de ser convenção e vira contrato.
+//
+//   Quem muta estado de OUTRA task (p.ex. `net_worker`) NÃO publica: o
+//   `StateStore` acumula o fato numa máscara sob lock, e a `app_loop` drena com
+//   `take_pending_events()` e publica aqui. Ver `state_store.hpp`.
+//
+//   Serializar o próprio EventBus foi considerado e descartado: custaria um
+//   lock em toda publicação para resolver algo que a disciplina de propriedade
+//   já resolve de graça — e ainda perderíamos o coalescing que a drenagem dá.
+//
+// O handler roda na task de quem publicou (a `app_loop`), imediatamente, sem
+// fila e sem troca de contexto.
 //
 // Contrato do handler, herdado de defeito real:
 //   - NÃO toca objetos LVGL (só a task de UI toca — ADR-011);

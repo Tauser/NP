@@ -19,35 +19,44 @@
 
 #include <cstdint>
 
-#include "core/event_bus.hpp"
 #include "core/lock.hpp"
 #include "models/app_state.hpp"
+#include "models/events.hpp"
 
 namespace nova {
 namespace core {
 
 class StateStore {
 public:
-    // `bus` pode ser nulo (testes que não observam eventos, boot antes do
-    // wiring). Quando presente, o StateStore é quem publica — ver abaixo.
-    StateStore(ILock& lock, EventBus* bus) : lock_(lock), bus_(bus) {}
+    explicit StateStore(ILock& lock) : lock_(lock) {}
 
-    // ── Mutação: muta E publica ──────────────────────────────────────────────
-    // O setter é o ÚNICO caminho de escrita e ele mesmo publica o fato. Deixar
-    // a publicação a cargo do chamador tornava possível mutar sem avisar
-    // ninguém — a tela ficaria velha e o bug seria invisível.
+    // ── Mutação: muta e REGISTRA o fato; não publica ─────────────────────────
+    // O setter é o único caminho de escrita. Ele NÃO chama o EventBus.
     //
-    // ORDEM, que é o ponto delicado: a mutação acontece sob o lock; o lock é
-    // LIBERADO; e só então o evento é publicado. Publicar com o lock na mão
-    // faria o handler rodar dentro da região crítica e, como o handler pode ler
-    // o estado, isso seria deadlock (o lock do alvo não é recursivo).
+    // POR QUE NÃO PUBLICA AQUI (concorrência): estes setters são chamados pela
+    // `app_loop` E pela `net_worker` (ARCHITECTURE §5). O EventBus é
+    // single-threaded por construção; se dois setters publicassem em paralelo,
+    // correriam a lista de handlers, os contadores e a flag de reentrância, e a
+    // ordem dos eventos poderia inverter. Em vez de tornar o EventBus
+    // thread-safe (custo em toda publicação), o fato é ACUMULADO numa máscara
+    // sob o mesmo lock da mutação, e só a `app_loop` publica — que é quem a
+    // tabela do §5 já designa como dona do despacho de UI.
     //
-    // Devolvem `true` só quando o valor MUDOU. Valor igual não muta e não
-    // publica: dedup na origem, porque evento redundante vira repintura e
-    // repintura custa banda MSPI (RESOURCE-BUDGET §1.1). Foi uma das causas de
-    // custo do baseline anterior (`ClockChanged` a 1 Hz repintando tela inteira).
+    // GANHO DE BRINDE: coalescing. Vinte mutações de relógio entre dois ticks
+    // viram UM bit, logo UM evento, logo uma repintura — não vinte. É o que a
+    // ADR-006 chama de "despachante é o dono único do coalescing", e ataca
+    // diretamente o custo de banda MSPI (RESOURCE-BUDGET §1.1).
+    //
+    // Devolvem `true` só quando o valor MUDOU. Valor igual não muta e não marca
+    // nada: dedup na origem.
     bool set_clock(uint8_t hour, uint8_t minute, bool valid);
     bool set_network(models::NetworkState s);
+
+    // ── Drenagem: EXCLUSIVA da `app_loop` ────────────────────────────────────
+    // Devolve a máscara acumulada e a ZERA, atomicamente sob o lock. A
+    // `app_loop` publica cada bit no EventBus DEPOIS desta chamada — portanto
+    // fora da região crítica e numa única task.
+    models::EventMask take_pending_events();
 
     // ── Leitura granular (ADR-011) ───────────────────────────────────────────
     models::ClockState clock() const;
@@ -55,8 +64,8 @@ public:
 
 private:
     ILock& lock_;
-    EventBus* bus_ = nullptr;
-    models::AppState state_;  // DONO ÚNICO: escrito só pelos setters acima
+    models::AppState state_;   // DONO ÚNICO: escrito só pelos setters acima
+    models::EventMask pending_ = 0;  // protegido pelo mesmo lock do estado
 };
 
 }  // namespace core

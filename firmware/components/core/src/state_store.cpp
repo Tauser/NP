@@ -4,37 +4,36 @@ namespace nova {
 namespace core {
 
 bool StateStore::set_clock(uint8_t hour, uint8_t minute, bool valid) {
-    bool changed = false;
-    {
-        LockGuard g(lock_);
-        models::ClockState& c = state_.clock_;
-        // Dedup na origem: sem mudança, sem evento, sem repintura.
-        if (c.hour_ != hour || c.minute_ != minute || c.valid_ != valid) {
-            c.hour_ = hour;
-            c.minute_ = minute;
-            c.valid_ = valid;
-            changed = true;
-        }
-    }  // lock LIBERADO aqui, antes de publicar (ver header: handler pode ler estado)
-    if (changed && bus_ != nullptr) {
-        bus_->publish(models::Event::kClockChanged);
+    LockGuard g(lock_);
+    models::ClockState& c = state_.clock_;
+    // Dedup na origem: sem mudança, sem fato registrado, sem repintura.
+    if (c.hour_ == hour && c.minute_ == minute && c.valid_ == valid) {
+        return false;
     }
-    return changed;
+    c.hour_ = hour;
+    c.minute_ = minute;
+    c.valid_ = valid;
+    // Mutação e registro do fato acontecem sob o MESMO lock: um leitor nunca vê
+    // estado novo sem o bit correspondente, nem o bit sem o estado.
+    pending_ |= models::mask_of(models::Event::kClockChanged);
+    return true;
 }
 
 bool StateStore::set_network(models::NetworkState s) {
-    bool changed = false;
-    {
-        LockGuard g(lock_);
-        if (state_.network_ != s) {
-            state_.network_ = s;
-            changed = true;
-        }
+    LockGuard g(lock_);
+    if (state_.network_ == s) {
+        return false;
     }
-    if (changed && bus_ != nullptr) {
-        bus_->publish(models::Event::kNetworkChanged);
-    }
-    return changed;
+    state_.network_ = s;
+    pending_ |= models::mask_of(models::Event::kNetworkChanged);
+    return true;
+}
+
+models::EventMask StateStore::take_pending_events() {
+    LockGuard g(lock_);
+    const models::EventMask m = pending_;
+    pending_ = 0;
+    return m;
 }
 
 models::ClockState StateStore::clock() const {
