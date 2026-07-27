@@ -14,6 +14,7 @@ INC=(
   -I"$FW/components/diag/include"
   -I"$FW/components/core/include"
   -I"$FW/components/models/include"
+  -I"$FW/components/utils/include"
 )
 
 "$CXX" -std="${CXXSTD:-c++17}" -Wall -Wextra -Werror "${INC[@]}" \
@@ -32,5 +33,11 @@ INC=(
   "$FW/components/core/src/pump.cpp" \
   -o "$OUT/test_core"
 
+"$CXX" -std="${CXXSTD:-c++17}" -Wall -Wextra -Werror "${INC[@]}" \
+  "$HERE/test_utils.cpp" \
+  "$FW/components/utils/src/status.cpp" \
+  -o "$OUT/test_utils"
+
 "$OUT/test_all"
 "$OUT/test_core"
+"$OUT/test_utils"
