@@ -94,16 +94,18 @@ como entregue sem todos os critérios atendidos e este arquivo atualizado.**
     nenhum request é feito. O `WaveshareBoard` sobe o link P4↔C6 em tarefa
     assíncrona de 4 KiB só após o primeiro frame/backlight; isso não associa
     Wi-Fi nem afirma conectividade. `host_check --app --tests`, `arch_check`
-    e `size_check` passaram em 2026-07-27. O operador tentou `idf.py build`
-    nesta revisão e ele parou em `esp_timer.h` por dependência ausente em
-    `services`; a correção declara `esp_timer` em `services` e `main`, mas o
-    novo build alvo e a validação de C6/heap/TLS em bancada **não foram executados**.
+    e `size_check` passaram em 2026-07-27. O primeiro build desta linha parou
+    em `esp_timer.h` por dependência ausente em `services`; corrigido ao
+    declarar `esp_timer` em `services` e `main`. O operador confirmou
+    `idf.py build` + flash após a correção (`425ba7b`) em 2026-07-27. Enlace
+    C6, heap TLS e HTTPS em bancada **não foram verificados**.
   - `components/providers/` — primeiro contrato por domínio, `ITimeProvider`,
     devolve `Result<UtcTime>` e o `MockTimeProvider` permite testar um futuro
     `ClockService` sem hardware ou rede. Não há adapter real, payload ou
     fixture nesta etapa; o primeiro parser deve trazer fixtures real,
     malformada e truncada conforme ADR-007. Host check/testes/arquitetura
-    passaram em 2026-07-27; build ESP-IDF desta revisão não foi executado.
+    passaram em 2026-07-27; o build/flash alvo desta revisão passou junto da
+    confirmação do operador para `425ba7b`, mas não há teste funcional do provider.
 - **Gates**: `tools/scripts/` — `host_check`, `arch_check`, `size_check`,
   `ui_check`, `hygiene`, `check_all`.
 
