@@ -29,7 +29,7 @@
 
 ```text
 Onda 0 - Atribuir o glitch de render                 [FECHADA — causa atribuída e corrigida]
-Onda A - Fundação: esqueleto, HAL, CI, render limpo  [em andamento — HAL, render, core/, utils/ e orquestrador prontos; HTTP/providers/UI pendentes]
+Onda A - Fundação: esqueleto, HAL, CI, render limpo  [em andamento — HAL, render, core/, utils/, orquestrador e contrato HTTP prontos; transporte/worker/providers/UI pendentes]
 Onda B - Dados reais, cache offline e degradação     [não iniciada]
 Onda C - Telas do produto                            [não iniciada]
 Onda D - Robustez comprovável e observabilidade      [não iniciada]
@@ -72,12 +72,15 @@ como entregue sem todos os critérios atendidos e este arquivo atualizado.**
     `UiDispatcher`, pump e `RequestOrchestrator` puro. O orquestrador entrega
     uma lease global por vez, com prioridade, intervalo, gap, backoff com
     jitter injetado e breaker `Closed→Open→HalfOpen`; não há HTTP, worker ou
-    wiring de rede ainda.
+    wiring de rede ainda. O `StateStore` agora recebe no wiring um mutex
+    FreeRTOS próprio (`CoreMutex`), separado do lock da UI.
   - `components/utils/` — `Status` e `Result<T>` puros, sem exceções nem
     alocação dinâmica; `Result<T>` aceita tipos de domínio sem construtor
-    padrão inclusive no caminho de falha. Host check e testes nativos passam
-    em 2026-07-27; `idf.py build` após as revisões de `core/` e `utils/` ainda
-    não foi verificado.
+    padrão inclusive no caminho de falha. `IHttpClient` recebe um
+    `BoundedHttpBody` fornecido pelo worker, que exige 48 KiB e rejeita
+    qualquer resposta maior com `kTooLarge`; ainda não há transporte ESP-IDF.
+    Host check e testes nativos passam em 2026-07-27; `idf.py build` após as
+    revisões de `core/` e `utils/` ainda não foi verificado.
 - **Gates**: `tools/scripts/` — `host_check`, `arch_check`, `size_check`,
   `ui_check`, `hygiene`, `check_all`.
 

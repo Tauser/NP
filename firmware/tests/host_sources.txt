@@ -10,3 +10,4 @@ components/core/src/ui_dispatcher.cpp
 components/core/src/pump.cpp
 components/core/src/request_orchestrator.cpp
 components/utils/src/status.cpp
+components/utils/src/http_client.cpp

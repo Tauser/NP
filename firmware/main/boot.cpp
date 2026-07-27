@@ -17,6 +17,7 @@
 #include "diag/render_workout.hpp"
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
+#include "freertos/semphr.h"
 #include "freertos/task.h"
 
 namespace nova {
@@ -49,6 +50,22 @@ constexpr int kFirstFrameTimeoutMs = 3000;
 // de verdade entre ciclos, porque consumo em repouso define a temperatura de
 // regime num produto 24/7 (RESOURCE-BUDGET §8).
 constexpr uint32_t kTickPeriodMs = 100;
+
+// Estado e rede não devem tomar o lock da UI: isso acoplaria uma mutação curta
+// do StateStore ao render e, quando o net_worker existir, deixaria TLS disputar
+// o mesmo mutex da lvgl_task. Este adaptador fica no wiring porque `core/`
+// conhece apenas ILock, nunca FreeRTOS.
+class CoreMutex final : public core::ILock {
+public:
+    CoreMutex() : mutex_(xSemaphoreCreateMutexStatic(&storage_)) {}
+
+    void lock() override { xSemaphoreTake(mutex_, portMAX_DELAY); }
+    void unlock() override { xSemaphoreGive(mutex_); }
+
+private:
+    StaticSemaphore_t storage_ = {};
+    SemaphoreHandle_t mutex_ = nullptr;
+};
 
 #ifdef NOVA_FLASH_THRASH
 // Erase a cada 500 ms: frequente o bastante para casar com o render, espaçado
@@ -84,7 +101,7 @@ void backlight_after_first_frame(board::IBoard& board) {
 }
 }  // namespace
 
-void app_loop(board::IBoard& hw);  // definida abaixo; não retorna
+void app_loop();  // definida abaixo; não retorna
 
 void run() {
     ESP_LOGI(kTag, "NovaPanel — baseline 2026-07 — Onda 0 (atribuir glitch)");
@@ -122,7 +139,7 @@ void run() {
     diag::start_flash_thrash(kFlashThrashPeriodMs);
 #endif
 
-    app_loop(board);  // não retorna
+    app_loop();  // não retorna
 }
 
 // Ciclo da `app_loop` (ARCHITECTURE §5): a ÚNICA task que publica no EventBus e
@@ -130,20 +147,8 @@ void run() {
 //
 // O passo do ciclo é `core::pump_once`, o MESMO código exercitado pelos testes
 // de host. Reimplementar a sequência aqui faria os testes validarem uma cópia.
-void app_loop(board::IBoard& hw) {
-    // Lock da HAL: o núcleo não conhece FreeRTOS, então recebe o mecanismo por
-    // injeção. `lock_ui` é o lock semântico do display/UI (RESOURCE-BUDGET §6).
-    class BoardLock : public core::ILock {
-    public:
-        explicit BoardLock(board::IBoard& b) : b_(b) {}
-        void lock() override { b_.lock_ui(0); }
-        void unlock() override { b_.unlock_ui(); }
-
-    private:
-        board::IBoard& b_;
-    };
-
-    static BoardLock lock(hw);
+void app_loop() {
+    static CoreMutex lock;
     static core::EventBus bus;
     static core::StateStore store(lock);
     static core::UiDispatcher dispatcher;

@@ -46,7 +46,14 @@ INC=(
   "$FW/components/utils/src/status.cpp" \
   -o "$OUT/test_request_orchestrator"
 
+"$CXX" -std="${CXXSTD:-c++17}" -Wall -Wextra -Werror "${INC[@]}" \
+  "$HERE/test_http_client.cpp" \
+  "$FW/components/utils/src/http_client.cpp" \
+  "$FW/components/utils/src/status.cpp" \
+  -o "$OUT/test_http_client"
+
 "$OUT/test_all"
 "$OUT/test_core"
 "$OUT/test_utils"
 "$OUT/test_request_orchestrator"
+"$OUT/test_http_client"

@@ -108,11 +108,13 @@ locks, brilho e RTC); tabela de partições A/B; gates estáticos e workflow de
 CI; `main/` como wiring. O núcleo entregue contém `StateStore`, `EventBus`,
 `ActionQueue` com overflow contado, `UiDispatcher`, pump de eventos e
 `RequestOrchestrator` (prioridade, intervalo, gap global e breaker); `utils/`
-contém `Status` e `Result<T>` (inclusive para tipos sem construtor padrão).
+contém `Status`, `Result<T>` (inclusive para tipos sem construtor padrão) e o
+contrato `IHttpClient` com coletor de corpo limitado a 48 KiB.
 
-**Entregas restantes.** `ServiceManager`; cliente HTTP com teto tratado como
-falha; interfaces de provider; registro de telas vazio e shell de UI. A Onda A
-continua aberta até cumprir todos os critérios abaixo.
+**Entregas restantes.** `ServiceManager`; transporte ESP-IDF e `NetworkWorker`
+serializado que executem o contrato HTTP; interfaces de provider; registro de
+telas vazio e shell de UI. A Onda A continua aberta até cumprir todos os
+critérios abaixo.
 
 **Critérios de saída**
 
