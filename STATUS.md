@@ -197,24 +197,28 @@ atualizada (nº 2), porque nenhuma teve um experimento capaz de falsificá-las.
   fotografar esta placa induz a erro repetidamente: barra sólida sai listrada,
   preto sai acinzentado. **Foto não é evidência de render neste hardware;**
   confirmação é sempre a olho.
-- **A rotação 180° NUNCA esteve ativa** — descoberto em 2026-07-26. O caminho
-  do PPA era código morto (`lv_display_set_rotation` jamais foi chamado), então
-  a tela sempre esteve de cabeça para baixo. Agora é feita por **hardware**
-  (`esp_lcd_panel_mirror` no `init_display`) — compatível com `avoid_tearing`,
-  mas **NÃO VERIFICADO em placa**: falta confirmar que o EK79007 aceita o
-  espelhamento (o log dirá `board.ws: mirror 180 por hardware: ESP_OK`).
-- **Custo do `full_refresh` não medido** (render de tela inteira por frame, em
-  vez de área parcial). Precisa entrar no RESOURCE-BUDGET §7 antes da Onda A.
-- **Correção de nenhum dos dois foi aplicada.** Onda 0 entrega a atribuição; a
-  correção (agendar escrita de flash fora do render p/ nº 1; buffer/sincronização
-  de flush p/ nº 2) é passo seguinte, com custo declarado.
-- Stack da `lvgl_task` medida só no carimbo; a "tela mais pesada" (que o
-  §2.1 exige) ainda não existe — sizing final continua pendente (bloqueia Onda A).
-- `hygiene` falha fora de checkout git (falso-positivo de ambiente; ver acima).
-- **Sinais novos a investigar** (do log de boot):
-  - `W ledc: GPIO 32 is not usable, maybe conflict with others` no
-    `brightness_init` — GPIO32 é o PWM do backlight, território direto da
-    **hipótese 2.2** (GLITCH §2.2). Backlight funcionou a 80% mesmo assim.
+- **Rotação 180°: RESOLVIDA** pelo pipeline do `esp_lvgl_adapter` (ADR-026),
+  confirmada em placa. Histórico, para não se repetir: por muito tempo ela
+  **nunca esteve ativa** (`lv_display_set_rotation` jamais era chamado, o
+  caminho do PPA era código morto); depois se tentou espelhamento por hardware,
+  que o EK79007 **aceita e ignora** (ver `docs/HARDWARE.md`).
+- **Custo de render do modo `TRIPLE_PARTIAL` não medido.** Precisa entrar no
+  RESOURCE-BUDGET §7 antes de fechar a Onda A. PSRAM já contabilizada
+  (3 framebuffers = 3,6 MB) e o buffer de desenho de 100 KiB em SRAM interna
+  está declarado no §3.
+- **Pilha da task de UI: NÃO DETERMINADA.** A medição anterior foi invalidada
+  pela troca de backend (nome de task mudou de `"taskLVGL"` para `"lvgl"`; a
+  sonda reportava `n/d` em silêncio até ser corrigida). Bloqueia Onda A.
+- **Validação pendente do perfil normal:** o build validado em placa estava em
+  modo diagnóstico (`NOVA_CLARITY=ON`, `NOVA_SMALL_STAMP=ON`). Falta rodar com
+  ambos desligados, por alguns minutos, confirmando no log: 3 framebuffers,
+  rotação 180°, métricas de flush e marca d'água **real** da task `"lvgl"`.
+- **Defeito nº 1 (erase de flash) segue sem correção** — é limite de hardware
+  (ADR-025), mitigado por política no RESOURCE-BUDGET §4.
+- ~~`W ledc: GPIO 32 is not usable`~~ — **explicado e corrigido**: era chamada
+  duplicada de `bsp_display_brightness_init()` (o BSP já a faz dentro de
+  `bsp_display_new_with_handles`). Não era evidência da hipótese 2.2, apesar de
+  ter sido tratado como tal durante a investigação.
   - Coredump antigo (8228 B) na partição `coredump`, de baseline anterior —
     decodificar ou apagar.
 

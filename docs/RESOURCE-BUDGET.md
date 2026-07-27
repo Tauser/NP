@@ -24,14 +24,19 @@ flash, compete com o refresh do display.** Sintomas observados **[herdado]**:
 
 ### 1.1 Custo por flush
 
-```text
-Draw buffer parcial de 60 linhas: 1024 × 60 × 2 B = 122.880 B
+Configuração vigente (ADR-026): `esp_lvgl_adapter`, modo `TRIPLE_PARTIAL`.
 
-Por flush, com rotação 180° via PPA:
-  leitura do draw buffer     122.880 B
-  escrita no framebuffer     122.880 B
+```text
+Draw buffer parcial de 50 linhas: 1024 × 50 × 2 B = 102.400 B
+  (o perfil MIPI do adapter usa use_psram=false -> SRAM INTERNA; ver §3)
+
+3 framebuffers lidos pelo DSI: 3 × 1024 × 600 × 2 B = 3.686.400 B  (PSRAM)
+
+Por flush, com rotação 180° pelo PPA no pipeline do adapter:
+  leitura do draw buffer     102.400 B
+  escrita no framebuffer     102.400 B
   ──────────────────────────────────────
-  total                      245.760 B  ≈ 0,25 MB de tráfego adicional
+  total                      204.800 B  ≈ 0,20 MB de tráfego adicional
 ```
 
 Um evento que dispare 13 flushes move ~3,2 MB em rajada **por cima** dos
@@ -84,8 +89,8 @@ Regras derivadas — **obrigatórias**:
 
    | Task | Pilha | Nota |
    |---|---|---|
-   | `lvgl_task` | **16 KB (partida p/ medir)** — ver 2.1 | agora também renderiza (ADR-011) |
-   | `net_worker` | 8 KB | prioridade **abaixo** da `lvgl_task` |
+   | `"lvgl"` (task de UI do adapter) | **16 KB (partida p/ medir)** — ver 2.1 | agora também renderiza (ADR-011) |
+   | `net_worker` | 8 KB | prioridade **abaixo** da task de UI |
    | `app_loop` | 8 KB | não renderiza mais; só wiring e tick |
 
    **Contrato de pilha de render:** a rotina de render **não copia
@@ -114,21 +119,25 @@ produto** — só que trocando de task. Antes de escrever a primeira tela:
 Enquanto não houver medição, o valor fica declarado como **não determinado**
 e isso bloqueia o fechamento da Onda A.
 
-**Estado (2026-07-26).** A `lvgl_task` do `esp_lvgl_port` foi configurada em
-`WaveshareBoard::init_display()` com **16 KB**. A marca d'água
-(`uxTaskGetStackHighWaterMark` da task `"taskLVGL"`) é exposta no dump periódico
-de `diag/render_probe`.
+**Estado (2026-07-26).** A task de UI é criada pelo **`esp_lvgl_adapter`** com
+nome **`"lvgl"`** (ADR-026), configurada com **16 KB** em
+`WaveshareBoard::init_display()`. A marca d'água
+(`uxTaskGetStackHighWaterMark`) é exposta no dump periódico de
+`diag/render_probe`.
 
-**Primeira medição em placa (2026-07-26, silício v1.3):** `pilha livre = 13.540 B`
-de 16.384 → **pico ≈ 2.844 B usados**. Folga atual ≈ 5,8×.
+**A medição anterior (13.540 B livres / pico ≈ 2.844 B) está INVALIDADA.** Ela
+foi feita com o backend antigo (`esp_lvgl_port`, task `"taskLVGL"`), com outro
+pipeline de render. Após a troca de backend a sonda passou a procurar um nome de
+task que não existe mais e reportava `n/d` em silêncio — corrigido, mas **o
+número real ainda não foi medido**.
 
-**Ressalva obrigatória:** essa medição é com o **carimbo de diagnóstico**
-(um label + um objeto), NÃO com "a tela mais pesada" que o §2.1 exige — essa
-tela ainda não existe. Portanto o número é um **piso**, não a sizing final. A
-regra "folga ≥ 2× sobre o pico da tela mais pesada" continua pendente e ainda
-**bloqueia o fechamento da Onda A**. O que fica provado é que 16 KB tem folga
-larga para o caminho de render atual; quando houver view-model de produto,
-refazer a conta.
+**Portanto: valor da pilha da task de UI = NÃO DETERMINADO.** Continua
+bloqueando o fechamento da Onda A, e agora por dois motivos: falta medir no
+backend atual, e falta a "tela mais pesada" que o §2.1 exige (que ainda não
+existe). Regra inalterada: folga ≥ 2× sobre o pico medido.
+
+**Lição registrada:** trocar de backend gráfico invalida medições de pilha. Um
+upgrade de `esp_lvgl_adapter`, BSP ou LVGL deve refazer esta medição, não herdá-la.
 
 ## 3. Limiares de RAM interna
 
@@ -137,6 +146,17 @@ refazer a conta.
 | Operação normal | > 80 KB livres | — |
 | `ResourceWarning` | < 60 KB | evento + log + métrica persistida |
 | Crítico | < 40 KB | suspende fetchers não críticos até recuperar |
+
+**Consumo fixo a descontar (ADR-026):** o perfil MIPI do `esp_lvgl_adapter` usa
+`use_psram = false`, então o **buffer de desenho parcial de 50 linhas
+(102.400 B ≈ 100 KiB) vive em SRAM interna** e é permanente. Isso sai do mesmo
+bolso que o handshake TLS (~130 KB internos, ADR-004) e que os limiares acima.
+
+**Consequência para a Onda B:** antes de ligar rede, medir o heap interno livre
+**com o display ativo** e confrontar com o teto de 48 KB de corpo HTTP (§2) e
+com o TLS. Se apertar, a saída é avaliar `use_psram = true` no perfil do
+adapter — o que devolve os 100 KiB à SRAM mas coloca o buffer de desenho na
+PSRAM, competindo com o DSI. É troca a medir, não a assumir.
 
 O amostrador roda a cada 5 s e só publica evento **na transição** de
 limiar, nunca a cada amostra. Evento sem handler real é proibido.

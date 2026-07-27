@@ -68,9 +68,23 @@ persistido e exposto junto das demais métricas.
 
 ## Gotchas de display validados
 
-- **O EK79007 não gira por MADCTL.** O mirror de hardware não tem efeito
-  visível: rotação 180° é por software/PPA (`sw_rotate=true`).
-- **`avoid_tearing` é incompatível com `sw_rotate`** neste BSP.
+- **O EK79007 não gira por MADCTL.** O comando é aceito (`ESP_OK`) e **ignorado**;
+  `esp_lcd_panel_swap_xy` retorna `not supported by this panel`. Confirmado por
+  dois caminhos em 2026-07-26, e o mesmo sintoma está reportado em
+  `espressif/esp-bsp#172`. Em painel DPI/vídeo o controlador só faz *streaming*
+  do framebuffer, o que explica o MADCTL não ter efeito.
+- **No `esp_lvgl_port`, `avoid_tearing` é incompatível com `sw_rotate`** — ou
+  seja, aquele backend obrigava a escolher entre rotação e ausência de tearing.
+  **Foi por isso que o backend foi trocado** pelo `esp_lvgl_adapter` (ADR-026),
+  que faz as duas coisas no mesmo pipeline. **Configuração vigente:**
+  `esp_lvgl_adapter`, modo `TRIPLE_PARTIAL`, 3 framebuffers, rotação 180°.
+- **No `esp_lvgl_adapter` 0.5.3, os modos `DOUBLE_*` não funcionam com rotação**
+  (inconsistência interna do componente): falham em silêncio e o LVGL entra em
+  loop de assert, que aparece como *task watchdog*. Há `static_assert` na board
+  impedindo essa combinação.
+- **`bsp_display_new_with_handles()` já chama `bsp_display_brightness_init()`.**
+  Chamar de novo reconfigura o LEDC e gera `ledc: GPIO 32 is not usable` — aviso
+  auto-infligido que já foi confundido com evidência de defeito de backlight.
 - **O "flicker" histórico era o backlight (GPIO32)**, não tearing. Antes de
   investigar pipeline gráfico, descarte o backlight
   (`GLITCH-PROTOCOLO.md` §2.2).
