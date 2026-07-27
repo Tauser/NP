@@ -19,6 +19,7 @@
 
 #include <cstdint>
 
+#include "core/event_bus.hpp"
 #include "core/lock.hpp"
 #include "models/app_state.hpp"
 
@@ -27,13 +28,24 @@ namespace core {
 
 class StateStore {
 public:
-    explicit StateStore(ILock& lock) : lock_(lock) {}
+    // `bus` pode ser nulo (testes que não observam eventos, boot antes do
+    // wiring). Quando presente, o StateStore é quem publica — ver abaixo.
+    StateStore(ILock& lock, EventBus* bus) : lock_(lock), bus_(bus) {}
 
-    // ── Mutação: cada setter devolve o evento a publicar, ou nada ────────────
-    // Devolvem `true` SÓ quando o valor mudou de fato. Isso é dedup na origem:
-    // publicar evento para valor idêntico gera repintura inútil, que custa banda
-    // MSPI (RESOURCE-BUDGET §1.1) — foi uma das causas de custo do baseline
-    // anterior (`ClockChanged` a 1 Hz repintando tela inteira).
+    // ── Mutação: muta E publica ──────────────────────────────────────────────
+    // O setter é o ÚNICO caminho de escrita e ele mesmo publica o fato. Deixar
+    // a publicação a cargo do chamador tornava possível mutar sem avisar
+    // ninguém — a tela ficaria velha e o bug seria invisível.
+    //
+    // ORDEM, que é o ponto delicado: a mutação acontece sob o lock; o lock é
+    // LIBERADO; e só então o evento é publicado. Publicar com o lock na mão
+    // faria o handler rodar dentro da região crítica e, como o handler pode ler
+    // o estado, isso seria deadlock (o lock do alvo não é recursivo).
+    //
+    // Devolvem `true` só quando o valor MUDOU. Valor igual não muta e não
+    // publica: dedup na origem, porque evento redundante vira repintura e
+    // repintura custa banda MSPI (RESOURCE-BUDGET §1.1). Foi uma das causas de
+    // custo do baseline anterior (`ClockChanged` a 1 Hz repintando tela inteira).
     bool set_clock(uint8_t hour, uint8_t minute, bool valid);
     bool set_network(models::NetworkState s);
 
@@ -43,7 +55,8 @@ public:
 
 private:
     ILock& lock_;
-    models::AppState state_;
+    EventBus* bus_ = nullptr;
+    models::AppState state_;  // DONO ÚNICO: escrito só pelos setters acima
 };
 
 }  // namespace core

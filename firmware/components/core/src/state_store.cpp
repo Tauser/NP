@@ -4,29 +4,42 @@ namespace nova {
 namespace core {
 
 bool StateStore::set_clock(uint8_t hour, uint8_t minute, bool valid) {
-    LockGuard g(lock_);
-    models::ClockState& c = state_.clock_;
-    if (c.hour_ == hour && c.minute_ == minute && c.valid_ == valid) {
-        return false;  // dedup na origem: sem mudança, sem evento, sem repintura
+    bool changed = false;
+    {
+        LockGuard g(lock_);
+        models::ClockState& c = state_.clock_;
+        // Dedup na origem: sem mudança, sem evento, sem repintura.
+        if (c.hour_ != hour || c.minute_ != minute || c.valid_ != valid) {
+            c.hour_ = hour;
+            c.minute_ = minute;
+            c.valid_ = valid;
+            changed = true;
+        }
+    }  // lock LIBERADO aqui, antes de publicar (ver header: handler pode ler estado)
+    if (changed && bus_ != nullptr) {
+        bus_->publish(models::Event::kClockChanged);
     }
-    c.hour_ = hour;
-    c.minute_ = minute;
-    c.valid_ = valid;
-    return true;
+    return changed;
 }
 
 bool StateStore::set_network(models::NetworkState s) {
-    LockGuard g(lock_);
-    if (state_.network_ == s) {
-        return false;
+    bool changed = false;
+    {
+        LockGuard g(lock_);
+        if (state_.network_ != s) {
+            state_.network_ = s;
+            changed = true;
+        }
     }
-    state_.network_ = s;
-    return true;
+    if (changed && bus_ != nullptr) {
+        bus_->publish(models::Event::kNetworkChanged);
+    }
+    return changed;
 }
 
 models::ClockState StateStore::clock() const {
     LockGuard g(lock_);
-    return state_.clock_;
+    return state_.clock_;  // cópia por valor: o leitor nunca recebe referência
 }
 
 models::NetworkState StateStore::network() const {

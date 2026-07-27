@@ -1,5 +1,15 @@
 // AppState — os fatos que a UI desenha (docs/ARCHITECTURE.md §6).
 //
+// PROPRIEDADE, declarada aqui porque o header é o lugar contratual (ADR-008):
+//
+//   ESCRITOR ÚNICO: `core::StateStore`, e somente pelos seus setters. Nenhum
+//   outro componente muta estes campos — nem services, nem UI, nem a HAL.
+//   LEITORES: recebem CÓPIA por valor via acessores granulares do StateStore.
+//   Não existe getter que devolva esta struct inteira (ADR-011) e nenhum leitor
+//   recebe referência ou ponteiro para ela.
+//   SERIALIZAÇÃO: pelo ILock injetado no StateStore. Comentário afirmando
+//   segurança sem mecanismo é proibido — já houve data race real assim.
+//
 // PURO. Cresce por domínio conforme as ondas avançam; hoje só tem o que a
 // Onda A justifica (ADR-023: nada de campo para dado que não existe).
 //

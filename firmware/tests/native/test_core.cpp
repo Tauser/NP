@@ -84,27 +84,88 @@ void test_event_bus() {
 }
 
 // ── StateStore ───────────────────────────────────────────────────────────────
+// Espião de eventos: registra o que foi publicado, para provar "evento correto"
+// e "nenhuma publicação quando o valor não mudou".
+struct Spy {
+    int count_ = 0;
+    nova::models::Event last_ = nova::models::Event::kCount;
+};
+Spy g_spy;
+
+void spy_handler(nova::models::Event e, void* ctx) {
+    Spy* s = static_cast<Spy*>(ctx);
+    ++s->count_;
+    s->last_ = e;
+}
+
+// Handler que LÊ o estado durante o despacho. Se o StateStore publicasse com o
+// lock na mão, isto travaria (o lock do alvo não é recursivo). Prova a ordem
+// "mutar sob lock -> liberar -> publicar".
+nova::core::StateStore* g_store_for_reentrancy = nullptr;
+void reading_handler(nova::models::Event, void*) {
+    if (g_store_for_reentrancy != nullptr) {
+        (void)g_store_for_reentrancy->clock();
+    }
+}
+
 void test_state_store() {
     using namespace nova;
     CountingLock lk;
-    core::StateStore st(lk);
+    core::EventBus bus;
+    g_spy = Spy{};
+    bus.subscribe(spy_handler, &g_spy);
+    core::StateStore st(lk, &bus);
 
+    // set_clock: estado correto + evento correto.
     check(st.set_clock(10, 30, true), "set_clock com valor novo => true");
-    check(!st.set_clock(10, 30, true), "set_clock com valor IGUAL => false (dedup)");
-    check(st.set_clock(10, 31, true), "set_clock com minuto novo => true");
+    check(g_spy.count_ == 1, "set_clock publicou 1 evento");
+    check(g_spy.last_ == models::Event::kClockChanged, "evento publicado e ClockChanged");
 
+    // Valor idêntico: NÃO muta e NÃO publica.
+    check(!st.set_clock(10, 30, true), "set_clock com valor IGUAL => false");
+    check(g_spy.count_ == 1, "valor igual NAO publicou evento (dedup)");
+
+    check(st.set_clock(10, 31, true), "set_clock com minuto novo => true");
+    check(g_spy.count_ == 2, "mudanca real publicou de novo");
     models::ClockState c = st.clock();
     check(c.hour_ == 10 && c.minute_ == 31 && c.valid_, "clock() devolve o valor gravado");
 
+    // set_network: mesmo contrato, evento próprio.
     check(st.set_network(models::NetworkState::kUp), "set_network novo => true");
-    check(!st.set_network(models::NetworkState::kUp), "set_network igual => false (dedup)");
+    check(g_spy.count_ == 3 && g_spy.last_ == models::Event::kNetworkChanged,
+          "set_network publicou NetworkChanged");
+    check(!st.set_network(models::NetworkState::kUp), "set_network igual => false");
+    check(g_spy.count_ == 3, "set_network igual NAO publicou");
     check(st.network() == models::NetworkState::kUp, "network() devolve o valor");
 
-    // Prova que os acessores serializam de verdade e não vazam lock.
+    // Sem bus: continua mutando, sem publicar e sem estourar.
+    CountingLock lk2;
+    core::StateStore no_bus(lk2, nullptr);
+    check(no_bus.set_clock(1, 2, true), "set_clock funciona sem EventBus");
+    check(no_bus.clock().hour_ == 1, "estado gravado sem EventBus");
+
+    // Prova que os acessores serializam e não vazam lock.
     check(lk.locks_ == lk.unlocks_, "todo lock teve unlock (sem vazamento)");
     check(lk.locks_ > 0, "acessores realmente usam o lock");
     check(lk.depth_ == 0, "profundidade zerada ao fim");
     check(lk.reentrant_ == 0, "nenhum lock aninhado (seria deadlock no alvo)");
+}
+
+// Prova a ORDEM: publicar acontece com o lock JÁ liberado, senão um handler que
+// lê o estado aninharia o lock.
+void test_publish_outside_lock() {
+    using namespace nova;
+    CountingLock lk;
+    core::EventBus bus;
+    core::StateStore st(lk, &bus);
+    g_store_for_reentrancy = &st;
+    bus.subscribe(reading_handler, nullptr);
+
+    st.set_clock(7, 45, true);
+
+    check(lk.reentrant_ == 0, "handler leu o estado SEM aninhar lock (publish fora da secao critica)");
+    check(lk.locks_ == lk.unlocks_, "locks balanceados apos publish com leitura no handler");
+    g_store_for_reentrancy = nullptr;
 }
 
 // ── ActionQueue ──────────────────────────────────────────────────────────────
@@ -166,6 +227,7 @@ int main() {
     std::printf("core tests:\n");
     test_event_bus();
     test_state_store();
+    test_publish_outside_lock();
     test_action_queue();
     test_event_mask();
     if (g_fail == 0) {
