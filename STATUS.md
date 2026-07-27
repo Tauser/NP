@@ -29,7 +29,7 @@
 
 ```text
 Onda 0 - Atribuir o glitch de render                 [FECHADA — causa atribuída e corrigida]
-Onda A - Fundação: esqueleto, HAL, CI, render limpo  [em andamento — HAL, render, core/, utils/, orquestrador, ServiceManager e transporte/worker HTTP prontos; providers/UI pendentes]
+Onda A - Fundação: esqueleto, HAL, CI, render limpo  [em andamento — HAL, render, core/, utils/, orquestrador, ServiceManager, transporte/worker HTTP e contrato inicial de provider prontos; adapters/domínios restantes/UI pendentes]
 Onda B - Dados reais, cache offline e degradação     [não iniciada]
 Onda C - Telas do produto                            [não iniciada]
 Onda D - Robustez comprovável e observabilidade      [não iniciada]
@@ -96,6 +96,12 @@ como entregue sem todos os critérios atendidos e este arquivo atualizado.**
     Wi-Fi nem afirma conectividade. `host_check --app --tests`, `arch_check`
     e `size_check` passaram em 2026-07-27; `idf.py build` desta revisão e
     validação de C6/heap/TLS em bancada **não foram executados**.
+  - `components/providers/` — primeiro contrato por domínio, `ITimeProvider`,
+    devolve `Result<UtcTime>` e o `MockTimeProvider` permite testar um futuro
+    `ClockService` sem hardware ou rede. Não há adapter real, payload ou
+    fixture nesta etapa; o primeiro parser deve trazer fixtures real,
+    malformada e truncada conforme ADR-007. Host check/testes/arquitetura
+    passaram em 2026-07-27; build ESP-IDF desta revisão não foi executado.
 - **Gates**: `tools/scripts/` — `host_check`, `arch_check`, `size_check`,
   `ui_check`, `hygiene`, `check_all`.
 

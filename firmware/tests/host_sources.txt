@@ -13,3 +13,4 @@ components/core/src/service_manager.cpp
 components/utils/src/status.cpp
 components/utils/src/http_client.cpp
 components/services/src/network_worker.cpp
+components/providers/src/mock_time_provider.cpp
