@@ -54,8 +54,15 @@ void on_render_event(lv_event_t* e) {
     }
 }
 
+// Nome da task de UI. O esp_lvgl_adapter cria "lvgl"
+// (esp_lv_adapter.c:702); o esp_lvgl_port antigo criava "taskLVGL". Trocar de
+// backend SEM trocar este nome faz a marca d'água virar "n/d" em silêncio — foi
+// o que aconteceu na migração da ADR-026. O adapter não expõe o handle, então a
+// busca por nome é a única via; se ela falhar, o log diz "n/d" em vez de mentir.
+constexpr const char* kUiTaskName = "lvgl";
+
 unsigned lvgl_task_stack_free_bytes() {
-    TaskHandle_t h = xTaskGetHandle("taskLVGL");
+    TaskHandle_t h = xTaskGetHandle(kUiTaskName);
     if (h == nullptr) {
         return 0;  // handle indisponível: reporta 0 e o log diz "n/d"
     }
