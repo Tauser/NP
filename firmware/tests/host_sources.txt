@@ -3,3 +3,6 @@
 components/board/src/dma_safety.cpp
 components/diag/src/render_metrics.cpp
 components/diag/src/boot_report.cpp
+components/core/src/event_bus.cpp
+components/core/src/state_store.cpp
+components/core/src/action_queue.cpp
