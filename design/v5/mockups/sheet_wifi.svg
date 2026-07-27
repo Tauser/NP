@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="600" viewBox="0 0 1024 600">
+  <rect width="1024" height="600" fill="#0E1015"/>
+  <text x="64.0" y="90.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="22" font-weight="400" fill="#454B58" text-anchor="start">‹</text>
+  <circle cx="108.0" cy="84.0" r="20.0" fill="#2A2418"/>
+  <text x="108.0" y="90.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="14" font-weight="700" fill="#454B58" text-anchor="middle">RL</text>
+  <text x="140.0" y="82.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="22" font-weight="600" fill="#454B58" text-anchor="start">Rafael Lopes</text>
+  <text x="140.0" y="104.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#454B58" text-anchor="start">Perfil padrão · NovaPanel ESP32-P4</text>
+  <rect x="64.0" y="130.0" width="500.0" height="1.0" rx="0" fill="#232833"/>
+  <text x="64.0" y="162.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#6A7180" text-anchor="start" letter-spacing="0.3">Rede</text>
+  <text x="64.0" y="190.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="18" font-weight="600" fill="#454B58" text-anchor="start">NovaNet 5G</text>
+  <text x="64.0" y="214.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#454B58" text-anchor="start">192.168.0.114 · -52 dBm</text>
+  <text x="64.0" y="356.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#6A7180" text-anchor="start" letter-spacing="0.3">Fuso horário</text>
+  <text x="64.0" y="382.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="16" font-weight="600" fill="#454B58" text-anchor="start">America/Sao_Paulo</text>
+  <text x="366.0" y="162.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#6A7180" text-anchor="start" letter-spacing="0.3">Tela e som</text>
+  <text x="366.0" y="190.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="15" font-weight="400" fill="#454B58" text-anchor="start">Brilho 78%</text>
+  <rect x="0.0" y="0.0" width="1024.0" height="600.0" rx="0" fill="#05070A" opacity="0.66"/>
+  <rect x="584.0" y="0.0" width="440.0" height="600.0" rx="0" fill="#14171E"/>
+  <rect x="584.0" y="0.0" width="1.0" height="600.0" rx="0" fill="#232833"/>
+  <text x="616.0" y="62.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="26" font-weight="600" fill="#F2F4F8" text-anchor="start">Wi-Fi</text>
+  <text x="992.0" y="62.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="22" font-weight="400" fill="#9BA2B0" text-anchor="end">×</text>
+  <text x="616.0" y="108.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="11" font-weight="400" fill="#6A7180" text-anchor="start">Conectada</text>
+  <path d="M 616 128.05 A 9 9 0 0 1 634 128.05" fill="none" stroke="#3FBF7F" stroke-width="1.6" stroke-linecap="round"/>
+  <path d="M 619 129.7 A 6 6 0 0 1 631 129.7" fill="none" stroke="#3FBF7F" stroke-width="1.6" stroke-linecap="round"/>
+  <path d="M 622 131.35 A 3 3 0 0 1 628 131.35" fill="none" stroke="#3FBF7F" stroke-width="1.6" stroke-linecap="round"/>
+  <circle cx="625.0" cy="134.5" r="1.4" fill="#3FBF7F"/>
+  <text x="642.0" y="140.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="17" font-weight="600" fill="#F2F4F8" text-anchor="start">NovaNet 5G</text>
+  <text x="616.0" y="164.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#6A7180" text-anchor="start">192.168.0.114 · -52 dBm · WPA2</text>
+  <text x="992.0" y="140.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#E2565B" text-anchor="end">Desconectar</text>
+  <rect x="616.0" y="188.0" width="376.0" height="1.0" rx="0" fill="#232833"/>
+  <text x="616.0" y="216.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="11" font-weight="400" fill="#6A7180" text-anchor="start">Disponíveis</text>
+  <path d="M 616 250.0 A 8 8 0 0 1 632 250.0" fill="none" stroke="#9BA2B0" stroke-width="1.6" stroke-linecap="round"/>
+  <path d="M 618.5 251.25 A 5.5 5.5 0 0 1 629.5 251.25" fill="none" stroke="#9BA2B0" stroke-width="1.6" stroke-linecap="round"/>
+  <path d="M 621 252.5 A 3 3 0 0 1 627 252.5" fill="none" stroke="#9BA2B0" stroke-width="1.6" stroke-linecap="round"/>
+  <circle cx="624.0" cy="255.0" r="1.3" fill="#9BA2B0"/>
+  <text x="646.0" y="254.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="15" font-weight="600" fill="#F2F4F8" text-anchor="start">NovaNet 2.4G</text>
+  <text x="646.0" y="271.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#6A7180" text-anchor="start">WPA2 · -61 dBm</text>
+  <text x="992.0" y="260.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="16" font-weight="400" fill="#6A7180" text-anchor="end">›</text>
+  <rect x="616.0" y="280.0" width="376.0" height="1.0" rx="0" fill="#232833"/>
+  <path d="M 616 300.0 A 8 8 0 0 1 632 300.0" fill="none" stroke="#9BA2B0" stroke-width="1.6" stroke-linecap="round"/>
+  <path d="M 618.5 301.25 A 5.5 5.5 0 0 1 629.5 301.25" fill="none" stroke="#9BA2B0" stroke-width="1.6" stroke-linecap="round"/>
+  <path d="M 621 302.5 A 3 3 0 0 1 627 302.5" fill="none" stroke="#454B58" stroke-width="1.6" stroke-linecap="round"/>
+  <circle cx="624.0" cy="305.0" r="1.3" fill="#9BA2B0"/>
+  <text x="646.0" y="304.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="15" font-weight="600" fill="#F2F4F8" text-anchor="start">Vizinho_5G</text>
+  <text x="646.0" y="321.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#6A7180" text-anchor="start">WPA3 · -74 dBm</text>
+  <text x="992.0" y="310.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="16" font-weight="400" fill="#6A7180" text-anchor="end">›</text>
+  <rect x="616.0" y="330.0" width="376.0" height="1.0" rx="0" fill="#232833"/>
+  <path d="M 616 350.0 A 8 8 0 0 1 632 350.0" fill="none" stroke="#9BA2B0" stroke-width="1.6" stroke-linecap="round"/>
+  <path d="M 618.5 351.25 A 5.5 5.5 0 0 1 629.5 351.25" fill="none" stroke="#454B58" stroke-width="1.6" stroke-linecap="round"/>
+  <path d="M 621 352.5 A 3 3 0 0 1 627 352.5" fill="none" stroke="#454B58" stroke-width="1.6" stroke-linecap="round"/>
+  <circle cx="624.0" cy="355.0" r="1.3" fill="#9BA2B0"/>
+  <text x="646.0" y="354.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="15" font-weight="600" fill="#F2F4F8" text-anchor="start">NET_8452</text>
+  <text x="646.0" y="371.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#6A7180" text-anchor="start">WPA2 · -82 dBm</text>
+  <text x="992.0" y="360.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="16" font-weight="400" fill="#6A7180" text-anchor="end">›</text>
+  <rect x="616.0" y="380.0" width="376.0" height="1.0" rx="0" fill="#232833"/>
+  <text x="616.0" y="412.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="15" font-weight="700" fill="#E8A83C" text-anchor="start">+</text>
+  <text x="632.0" y="412.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="14" font-weight="400" fill="#E8A83C" text-anchor="start">Adicionar rede oculta</text>
+  <rect x="616.0" y="508.0" width="376.0" height="46.0" rx="10" fill="#E8A83C"/>
+  <text x="804.0" y="538.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="16" font-weight="600" fill="#12140F" text-anchor="middle">Concluído</text>
+</svg>

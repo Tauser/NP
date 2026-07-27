@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="600" viewBox="0 0 1024 600">
+  <rect width="1024" height="600" fill="#0E1015"/>
+  <text x="64.0" y="76.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="22" font-weight="400" fill="#9BA2B0" text-anchor="start">‹</text>
+  <text x="94.0" y="78.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="26" font-weight="600" fill="#F2F4F8" text-anchor="start">Notificações</text>
+  <text x="288.0" y="78.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#6A7180" text-anchor="start">4</text>
+  <text x="960.0" y="76.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="14" font-weight="400" fill="#E8A83C" text-anchor="end">Marcar todas como lidas</text>
+  <rect x="64.0" y="104.0" width="896.0" height="1.0" rx="0" fill="#232833"/>
+  <circle cx="69.0" cy="144.0" r="4.0" fill="#E8A83C"/>
+  <text x="86.0" y="148.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="17" font-weight="600" fill="#F2F4F8" text-anchor="start">Firmware v1.4 disponível</text>
+  <text x="86.0" y="170.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#6A7180" text-anchor="start">Pronto para instalar · 2,1 MB</text>
+  <text x="960.0" y="148.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#6A7180" text-anchor="end">há 5 min</text>
+  <rect x="64.0" y="188.0" width="896.0" height="1.0" rx="0" fill="#232833"/>
+  <circle cx="69.0" cy="220.0" r="4.0" fill="#3FBF7F"/>
+  <text x="86.0" y="224.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="17" font-weight="600" fill="#F2F4F8" text-anchor="start">Bitcoin acima de US$ 103 mil</text>
+  <text x="86.0" y="246.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#6A7180" text-anchor="start">Variação de +2,41% nas últimas 24 h</text>
+  <text x="960.0" y="224.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#6A7180" text-anchor="end">há 12 min</text>
+  <rect x="64.0" y="264.0" width="896.0" height="1.0" rx="0" fill="#232833"/>
+  <circle cx="69.0" cy="296.0" r="4.0" fill="#6A7180"/>
+  <text x="86.0" y="300.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="17" font-weight="600" fill="#9BA2B0" text-anchor="start">Sincronização concluída</text>
+  <text x="86.0" y="322.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#6A7180" text-anchor="start">Agenda e clima atualizados</text>
+  <text x="960.0" y="300.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#6A7180" text-anchor="end">há 32 min</text>
+  <rect x="64.0" y="340.0" width="896.0" height="1.0" rx="0" fill="#232833"/>
+  <circle cx="69.0" cy="372.0" r="4.0" fill="#E2565B"/>
+  <text x="86.0" y="376.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="17" font-weight="600" fill="#F2F4F8" text-anchor="start">Sensor da sala sem resposta</text>
+  <text x="86.0" y="398.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#6A7180" text-anchor="start">Última leitura há 1 hora</text>
+  <text x="960.0" y="376.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#6A7180" text-anchor="end">há 1 h</text>
+  <text x="64.0" y="496.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#6A7180" text-anchor="start">Notificações são apagadas após 24 horas</text>
+  <circle cx="512.0" cy="556.0" r="16.0" fill="#181C24"/>
+  <text x="512.0" y="562.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="15" font-weight="400" fill="#9BA2B0" text-anchor="middle">↓</text>
+</svg>

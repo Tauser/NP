@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="600" viewBox="0 0 1024 600">
+  <rect width="1024" height="600" fill="#0E1015"/>
+  <rect x="100.0" y="232.0" width="11.0" height="11.0" rx="2" fill="#E8A83C"/>
+  <text x="100.0" y="330.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="76" font-weight="300" fill="#F2F4F8" text-anchor="start">Nova</text>
+  <text x="296.0" y="330.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="76" font-weight="300" fill="#6A7180" text-anchor="start">Panel</text>
+  <rect x="100.0" y="380.0" width="148.0" height="2.0" rx="1" fill="#E8A83C"/>
+  <text x="100.0" y="402.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#9BA2B0" text-anchor="start">Display</text>
+  <rect x="260.0" y="380.0" width="148.0" height="2.0" rx="1" fill="#E8A83C"/>
+  <text x="260.0" y="402.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#9BA2B0" text-anchor="start">Armazenamento</text>
+  <rect x="420.0" y="380.0" width="148.0" height="2.0" rx="1" fill="#E8A83C"/>
+  <text x="420.0" y="402.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="12" font-weight="600" fill="#E8A83C" text-anchor="start">Rede</text>
+  <rect x="580.0" y="380.0" width="148.0" height="2.0" rx="1" fill="#2C313C"/>
+  <text x="580.0" y="402.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#454B58" text-anchor="start">Hora</text>
+  <rect x="740.0" y="380.0" width="148.0" height="2.0" rx="1" fill="#2C313C"/>
+  <text x="740.0" y="402.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#454B58" text-anchor="start">Dados</text>
+  <text x="100.0" y="452.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="17" font-weight="600" fill="#F2F4F8" text-anchor="start">Conectando a NovaNet 5G</text>
+  <text x="100.0" y="540.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="11" font-weight="400" fill="#454B58" text-anchor="start">NovaOS v1.3 · ESP32-P4 + C6 · 6f:2a:19:c4</text>
+</svg>

@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="600" viewBox="0 0 1024 600">
+  <rect width="1024" height="600" fill="#0E1015"/>
+  <path d="M 954 46 L 954 41 A 6 6 0 0 1 966 41 L 966 46 L 967.5 48 L 952.5 48 Z" fill="none" stroke="#9BA2B0" stroke-width="1.4" stroke-linecap="round"/>
+  <path d="M 958 50 A 2 2 0 0 0 962 50" fill="none" stroke="#9BA2B0" stroke-width="1.4" stroke-linecap="round"/>
+  <circle cx="967.0" cy="35.0" r="3.0" fill="#E8A83C"/>
+  <path d="M 906 40.05 A 9 9 0 0 1 924 40.05" fill="none" stroke="#9BA2B0" stroke-width="1.6" stroke-linecap="round"/>
+  <path d="M 909 41.7 A 6 6 0 0 1 921 41.7" fill="none" stroke="#9BA2B0" stroke-width="1.6" stroke-linecap="round"/>
+  <path d="M 912 43.35 A 3 3 0 0 1 918 43.35" fill="none" stroke="#9BA2B0" stroke-width="1.6" stroke-linecap="round"/>
+  <circle cx="915.0" cy="46.5" r="1.4" fill="#9BA2B0"/>
+  <rect x="860.0" y="38.0" width="16.0" height="1.6" rx="1" fill="#9BA2B0"/>
+  <rect x="860.0" y="43.0" width="16.0" height="1.6" rx="1" fill="#9BA2B0"/>
+  <rect x="860.0" y="48.0" width="16.0" height="1.6" rx="1" fill="#9BA2B0"/>
+  <text x="64.0" y="100.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="15" font-weight="600" fill="#E8A83C" text-anchor="start">BTC/USD</text>
+  <rect x="64.0" y="112.0" width="62.0" height="2.0" rx="1" fill="#E8A83C"/>
+  <text x="173.0" y="100.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="15" font-weight="400" fill="#6A7180" text-anchor="start">USD/BRL</text>
+  <text x="282.0" y="100.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="15" font-weight="400" fill="#6A7180" text-anchor="start">Ibovespa</text>
+  <rect x="64.0" y="128.0" width="630.0" height="1.0" rx="0" fill="#232833"/>
+  <text x="64.0" y="226.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="88" font-weight="600" fill="#F2F4F8" text-anchor="start" letter-spacing="-3">103.842</text>
+  <text x="64.0" y="254.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="13" font-weight="600" fill="#9BA2B0" text-anchor="start">dólares por bitcoin</text>
+  <path d="M 66 287 L 72.0 278 L 78 287 Z" fill="#3FBF7F"/>
+  <text x="84.0" y="292.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="26" font-weight="600" fill="#3FBF7F" text-anchor="start">2,41%</text>
+  <text x="182.0" y="290.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="14" font-weight="400" fill="#6A7180" text-anchor="start">nas últimas 24 horas</text>
+  <rect x="64.0" y="322.0" width="570.0" height="1.0" rx="0" fill="#232833"/>
+  <text x="64.0" y="350.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="11" font-weight="400" fill="#6A7180" text-anchor="start">Abertura</text>
+  <text x="64.0" y="376.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="20" font-weight="700" fill="#F2F4F8" text-anchor="start">101.398</text>
+  <text x="206.0" y="350.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="11" font-weight="400" fill="#6A7180" text-anchor="start">Máxima</text>
+  <text x="206.0" y="376.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="20" font-weight="700" fill="#F2F4F8" text-anchor="start">104.521</text>
+  <text x="348.0" y="350.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="11" font-weight="400" fill="#6A7180" text-anchor="start">Mínima</text>
+  <text x="348.0" y="376.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="20" font-weight="700" fill="#F2F4F8" text-anchor="start">100.841</text>
+  <text x="490.0" y="350.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="11" font-weight="400" fill="#6A7180" text-anchor="start">Volume</text>
+  <text x="490.0" y="376.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="20" font-weight="700" fill="#F2F4F8" text-anchor="start">28,4 bi</text>
+  <rect x="686.0" y="120.0" width="1.0" height="300.0" rx="0" fill="#232833"/>
+  <circle cx="724.0" cy="158.0" r="3.5" fill="#3FBF7F"/>
+  <text x="734.0" y="162.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#3FBF7F" text-anchor="start">ao vivo</text>
+  <text x="720.0" y="192.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="14" font-weight="600" fill="#9BA2B0" text-anchor="start">CoinGecko</text>
+  <text x="720.0" y="210.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="14" font-weight="600" fill="#9BA2B0" text-anchor="start">atualizado 09:42</text>
+  <rect x="720.0" y="232.0" width="230.0" height="1.0" rx="0" fill="#232833"/>
+  <text x="720.0" y="262.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="11" font-weight="400" fill="#6A7180" text-anchor="start">Dólar</text>
+  <text x="720.0" y="288.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="20" font-weight="700" fill="#F2F4F8" text-anchor="start">5,42</text>
+  <path d="M 782 278 L 786.5 285 L 791 278 Z" fill="#E2565B"/>
+  <text x="797.0" y="287.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#E2565B" text-anchor="start">0,18%</text>
+  <text x="720.0" y="316.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="11" font-weight="400" fill="#6A7180" text-anchor="start">Ibovespa</text>
+  <text x="720.0" y="342.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="20" font-weight="700" fill="#F2F4F8" text-anchor="start">138.540</text>
+  <path d="M 822 332 L 826.5 339 L 831 332 Z" fill="#E2565B"/>
+  <text x="837.0" y="341.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#E2565B" text-anchor="start">0,60%</text>
+  <rect x="462.0" y="578.0" width="6.0" height="5.0" rx="3" fill="#2A2F3A"/>
+  <rect x="475.0" y="578.0" width="6.0" height="5.0" rx="3" fill="#2A2F3A"/>
+  <rect x="488.0" y="578.0" width="22.0" height="5.0" rx="3" fill="#E8A83C"/>
+  <rect x="517.0" y="578.0" width="6.0" height="5.0" rx="3" fill="#2A2F3A"/>
+  <rect x="530.0" y="578.0" width="6.0" height="5.0" rx="3" fill="#2A2F3A"/>
+  <rect x="543.0" y="578.0" width="6.0" height="5.0" rx="3" fill="#2A2F3A"/>
+  <rect x="556.0" y="578.0" width="6.0" height="5.0" rx="3" fill="#2A2F3A"/>
+</svg>

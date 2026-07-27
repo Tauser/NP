@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="600" viewBox="0 0 1024 600">
+  <rect width="1024" height="600" fill="#0E1015"/>
+  <path d="M 954 46 L 954 41 A 6 6 0 0 1 966 41 L 966 46 L 967.5 48 L 952.5 48 Z" fill="none" stroke="#9BA2B0" stroke-width="1.4" stroke-linecap="round"/>
+  <path d="M 958 50 A 2 2 0 0 0 962 50" fill="none" stroke="#9BA2B0" stroke-width="1.4" stroke-linecap="round"/>
+  <path d="M 906 40.05 A 9 9 0 0 1 924 40.05" fill="none" stroke="#9BA2B0" stroke-width="1.6" stroke-linecap="round"/>
+  <path d="M 909 41.7 A 6 6 0 0 1 921 41.7" fill="none" stroke="#9BA2B0" stroke-width="1.6" stroke-linecap="round"/>
+  <path d="M 912 43.35 A 3 3 0 0 1 918 43.35" fill="none" stroke="#9BA2B0" stroke-width="1.6" stroke-linecap="round"/>
+  <circle cx="915.0" cy="46.5" r="1.4" fill="#9BA2B0"/>
+  <rect x="860.0" y="38.0" width="16.0" height="1.6" rx="1" fill="#9BA2B0"/>
+  <rect x="860.0" y="43.0" width="16.0" height="1.6" rx="1" fill="#9BA2B0"/>
+  <rect x="860.0" y="48.0" width="16.0" height="1.6" rx="1" fill="#9BA2B0"/>
+  <text x="64.0" y="90.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="22" font-weight="400" fill="#9BA2B0" text-anchor="start">‹</text>
+  <circle cx="108.0" cy="84.0" r="20.0" fill="#4A3A1A"/>
+  <text x="108.0" y="90.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="14" font-weight="700" fill="#E8A83C" text-anchor="middle">RL</text>
+  <text x="140.0" y="82.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="22" font-weight="600" fill="#F2F4F8" text-anchor="start">Rafael Lopes</text>
+  <text x="140.0" y="104.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#6A7180" text-anchor="start">Perfil padrão · NovaPanel ESP32-P4</text>
+  <text x="920.0" y="90.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="14" font-weight="400" fill="#E8A83C" text-anchor="end">Editar</text>
+  <rect x="64.0" y="130.0" width="856.0" height="1.0" rx="0" fill="#232833"/>
+  <text x="64.0" y="162.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#6A7180" text-anchor="start" letter-spacing="0.3">Rede</text>
+  <path d="M 64 178.05 A 9 9 0 0 1 82 178.05" fill="none" stroke="#3FBF7F" stroke-width="1.6" stroke-linecap="round"/>
+  <path d="M 67 179.7 A 6 6 0 0 1 79 179.7" fill="none" stroke="#3FBF7F" stroke-width="1.6" stroke-linecap="round"/>
+  <path d="M 70 181.35 A 3 3 0 0 1 76 181.35" fill="none" stroke="#3FBF7F" stroke-width="1.6" stroke-linecap="round"/>
+  <circle cx="73.0" cy="184.5" r="1.4" fill="#3FBF7F"/>
+  <text x="90.0" y="190.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="18" font-weight="600" fill="#F2F4F8" text-anchor="start">NovaNet 5G</text>
+  <text x="64.0" y="214.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#6A7180" text-anchor="start">192.168.0.114 · -52 dBm · WPA2</text>
+  <text x="64.0" y="240.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#E8A83C" text-anchor="start">Gerenciar redes ›</text>
+  <text x="64.0" y="288.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="15" font-weight="400" fill="#F2F4F8" text-anchor="start">Bluetooth</text>
+  <text x="64.0" y="308.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#6A7180" text-anchor="start">Desativado</text>
+  <rect x="264.0" y="282.0" width="38.0" height="20.0" rx="10.0" fill="#2C313C"/>
+  <circle cx="276.0" cy="292.0" r="7.0" fill="#6A7180"/>
+  <text x="64.0" y="356.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#6A7180" text-anchor="start" letter-spacing="0.3">Fuso horário</text>
+  <text x="64.0" y="382.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="16" font-weight="600" fill="#F2F4F8" text-anchor="start">America/Sao_Paulo</text>
+  <text x="64.0" y="404.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#6A7180" text-anchor="start">UTC-3 · NTP automático</text>
+  <text x="64.0" y="430.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#E8A83C" text-anchor="start">Trocar fuso ›</text>
+  <rect x="336.0" y="150.0" width="1.0" height="330.0" rx="0" fill="#232833"/>
+  <text x="366.0" y="162.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#6A7180" text-anchor="start" letter-spacing="0.3">Tela e som</text>
+  <text x="366.0" y="188.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="14" font-weight="400" fill="#F2F4F8" text-anchor="start">Brilho</text>
+  <text x="616.0" y="188.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#9BA2B0" text-anchor="end">78%</text>
+  <rect x="366.0" y="200.0" width="250.0" height="3.0" rx="2" fill="#2C313C"/>
+  <rect x="366.0" y="200.0" width="195.0" height="3.0" rx="2" fill="#E8A83C"/>
+  <circle cx="561.0" cy="201.5" r="6.0" fill="#E8A83C"/>
+  <text x="366.0" y="234.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="14" font-weight="400" fill="#F2F4F8" text-anchor="start">Volume do sistema</text>
+  <text x="616.0" y="234.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#9BA2B0" text-anchor="end">65%</text>
+  <rect x="366.0" y="246.0" width="250.0" height="3.0" rx="2" fill="#2C313C"/>
+  <rect x="366.0" y="246.0" width="162.5" height="3.0" rx="2" fill="#E8A83C"/>
+  <circle cx="528.5" cy="247.5" r="6.0" fill="#E8A83C"/>
+  <text x="366.0" y="280.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="14" font-weight="400" fill="#F2F4F8" text-anchor="start">Volume da música</text>
+  <text x="616.0" y="280.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#9BA2B0" text-anchor="end">80%</text>
+  <rect x="366.0" y="292.0" width="250.0" height="3.0" rx="2" fill="#2C313C"/>
+  <rect x="366.0" y="292.0" width="200.0" height="3.0" rx="2" fill="#E8A83C"/>
+  <circle cx="566.0" cy="293.5" r="6.0" fill="#E8A83C"/>
+  <text x="366.0" y="326.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="14" font-weight="400" fill="#F2F4F8" text-anchor="start">Volume do alarme</text>
+  <text x="616.0" y="326.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#9BA2B0" text-anchor="end">90%</text>
+  <rect x="366.0" y="338.0" width="250.0" height="3.0" rx="2" fill="#2C313C"/>
+  <rect x="366.0" y="338.0" width="225.0" height="3.0" rx="2" fill="#E8A83C"/>
+  <circle cx="591.0" cy="339.5" r="6.0" fill="#E8A83C"/>
+  <text x="366.0" y="396.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#6A7180" text-anchor="start" letter-spacing="0.3">Tema</text>
+  <rect x="366.0" y="408.0" width="78.0" height="30.0" rx="8" fill="#181C24" stroke="#232833" stroke-width="1"/>
+  <text x="405.0" y="428.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#F2F4F8" text-anchor="middle">Grafite</text>
+  <rect x="452.0" y="408.0" width="78.0" height="30.0" rx="8" fill="#14171E" stroke="#232833" stroke-width="1"/>
+  <text x="491.0" y="428.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#6A7180" text-anchor="middle">Carvão</text>
+  <rect x="538.0" y="408.0" width="78.0" height="30.0" rx="8" fill="#14171E" stroke="#232833" stroke-width="1"/>
+  <text x="577.0" y="428.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#6A7180" text-anchor="middle">Âmbar</text>
+  <text x="366.0" y="476.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="15" font-weight="400" fill="#F2F4F8" text-anchor="start">Modo noturno</text>
+  <text x="366.0" y="496.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#6A7180" text-anchor="start">22:00 - 06:00</text>
+  <rect x="590.0" y="470.0" width="38.0" height="20.0" rx="10.0" fill="#E8A83C"/>
+  <circle cx="616.0" cy="480.0" r="7.0" fill="#12140F"/>
+  <rect x="660.0" y="150.0" width="1.0" height="330.0" rx="0" fill="#232833"/>
+  <text x="690.0" y="162.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#6A7180" text-anchor="start" letter-spacing="0.3">Sistema</text>
+  <text x="690.0" y="192.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#6A7180" text-anchor="start">Wi-Fi</text>
+  <text x="920.0" y="192.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="13" font-weight="600" fill="#F2F4F8" text-anchor="end">NovaNet 5G · -52 dBm</text>
+  <text x="690.0" y="220.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#6A7180" text-anchor="start">IP</text>
+  <text x="920.0" y="220.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="13" font-weight="600" fill="#F2F4F8" text-anchor="end">192.168.0.114</text>
+  <text x="690.0" y="248.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#6A7180" text-anchor="start">Display</text>
+  <text x="920.0" y="248.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="13" font-weight="600" fill="#F2F4F8" text-anchor="end">1024×600 · RGB565</text>
+  <text x="690.0" y="276.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#6A7180" text-anchor="start">Touch</text>
+  <text x="920.0" y="276.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="13" font-weight="600" fill="#F2F4F8" text-anchor="end">Capacitivo · OK</text>
+  <text x="690.0" y="304.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#6A7180" text-anchor="start">Ativo há</text>
+  <text x="920.0" y="304.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="13" font-weight="600" fill="#F2F4F8" text-anchor="end">14 d 06 h 22 min</text>
+  <text x="690.0" y="332.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#6A7180" text-anchor="start">Temperatura</text>
+  <text x="920.0" y="332.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="13" font-weight="600" fill="#F2F4F8" text-anchor="end">48 °C</text>
+  <text x="690.0" y="360.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#6A7180" text-anchor="start">Firmware</text>
+  <text x="920.0" y="360.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="13" font-weight="600" fill="#F2F4F8" text-anchor="end">NovaOS v1.3</text>
+  <rect x="690.0" y="400.0" width="230.0" height="44.0" rx="10" fill="#E8A83C"/>
+  <text x="805.0" y="428.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="14" font-weight="600" fill="#12140F" text-anchor="middle">↻  Atualizar para a v1.4</text>
+  <circle cx="696.0" cy="468.0" r="6.0" fill="none" stroke="#9BA2B0" stroke-width="1.4"/>
+  <path d="M 696 462 L 696 468" fill="none" stroke="#9BA2B0" stroke-width="1.4" stroke-linecap="round"/>
+  <text x="712.0" y="472.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#9BA2B0" text-anchor="start">Reiniciar dispositivo</text>
+</svg>

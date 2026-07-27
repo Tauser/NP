@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="600" viewBox="0 0 1024 600">
+  <rect width="1024" height="600" fill="#0E1015"/>
+  <path d="M 954 46 L 954 41 A 6 6 0 0 1 966 41 L 966 46 L 967.5 48 L 952.5 48 Z" fill="none" stroke="#9BA2B0" stroke-width="1.4" stroke-linecap="round"/>
+  <path d="M 958 50 A 2 2 0 0 0 962 50" fill="none" stroke="#9BA2B0" stroke-width="1.4" stroke-linecap="round"/>
+  <circle cx="967.0" cy="35.0" r="3.0" fill="#E8A83C"/>
+  <path d="M 906 40.05 A 9 9 0 0 1 924 40.05" fill="none" stroke="#9BA2B0" stroke-width="1.6" stroke-linecap="round"/>
+  <path d="M 909 41.7 A 6 6 0 0 1 921 41.7" fill="none" stroke="#9BA2B0" stroke-width="1.6" stroke-linecap="round"/>
+  <path d="M 912 43.35 A 3 3 0 0 1 918 43.35" fill="none" stroke="#9BA2B0" stroke-width="1.6" stroke-linecap="round"/>
+  <circle cx="915.0" cy="46.5" r="1.4" fill="#9BA2B0"/>
+  <rect x="860.0" y="38.0" width="16.0" height="1.6" rx="1" fill="#9BA2B0"/>
+  <rect x="860.0" y="43.0" width="16.0" height="1.6" rx="1" fill="#9BA2B0"/>
+  <rect x="860.0" y="48.0" width="16.0" height="1.6" rx="1" fill="#9BA2B0"/>
+  <text x="64.0" y="78.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#6A7180" text-anchor="start">A seguir · em 1 h 12</text>
+  <text x="64.0" y="138.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="46" font-weight="600" fill="#E8A83C" text-anchor="start">15:30</text>
+  <text x="64.0" y="176.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="22" font-weight="600" fill="#F2F4F8" text-anchor="start">Reunião — NoiseBot team</text>
+  <text x="64.0" y="200.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#6A7180" text-anchor="start">Sala virtual · Trabalho · 45 min</text>
+  <text x="64.0" y="248.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#6A7180" text-anchor="start" letter-spacing="0.3">Hoje</text>
+  <text x="64.0" y="294.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="17" font-weight="500" fill="#9BA2B0" text-anchor="start">15:30</text>
+  <rect x="138.0" y="272.0" width="3.0" height="34.0" rx="2" fill="#E8A83C"/>
+  <text x="154.0" y="286.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="15" font-weight="600" fill="#F2F4F8" text-anchor="start">Reunião — NoiseBot team</text>
+  <text x="154.0" y="303.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#6A7180" text-anchor="start">Trabalho · 45 min</text>
+  <text x="64.0" y="352.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="17" font-weight="500" fill="#9BA2B0" text-anchor="start">17:00</text>
+  <rect x="138.0" y="330.0" width="3.0" height="34.0" rx="2" fill="#3FBF7F"/>
+  <text x="154.0" y="344.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="15" font-weight="600" fill="#F2F4F8" text-anchor="start">Academia</text>
+  <text x="154.0" y="361.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#6A7180" text-anchor="start">Pessoal · 1 h</text>
+  <text x="64.0" y="410.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="17" font-weight="500" fill="#9BA2B0" text-anchor="start">19:30</text>
+  <rect x="138.0" y="388.0" width="3.0" height="34.0" rx="2" fill="#3FBF7F"/>
+  <text x="154.0" y="402.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="15" font-weight="600" fill="#F2F4F8" text-anchor="start">Jantar com Marina</text>
+  <text x="154.0" y="419.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#6A7180" text-anchor="start">Pessoal · 2 h</text>
+  <rect x="538.0" y="70.0" width="1.0" height="400.0" rx="0" fill="#232833"/>
+  <text x="578.0" y="78.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#6A7180" text-anchor="start">Resumo de hoje</text>
+  <text x="578.0" y="148.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="44" font-weight="600" fill="#F2F4F8" text-anchor="start">4</text>
+  <text x="662.0" y="148.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="44" font-weight="600" fill="#E8A83C" text-anchor="start">1 h</text>
+  <text x="578.0" y="170.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#6A7180" text-anchor="start">eventos</text>
+  <text x="662.0" y="170.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#6A7180" text-anchor="start">até o próximo</text>
+  <text x="578.0" y="216.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="15" font-weight="400" fill="#F2F4F8" text-anchor="start">2 trabalho · 2 pessoal</text>
+  <rect x="578.0" y="244.0" width="310.0" height="1.0" rx="0" fill="#232833"/>
+  <text x="578.0" y="274.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#6A7180" text-anchor="start">Amanhã</text>
+  <text x="578.0" y="302.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="17" font-weight="400" fill="#6A7180" text-anchor="start">Nada agendado</text>
+  <text x="578.0" y="396.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="16" font-weight="700" fill="#E8A83C" text-anchor="start">+</text>
+  <text x="596.0" y="396.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="15" font-weight="400" fill="#E8A83C" text-anchor="start">Adicionar evento</text>
+  <rect x="462.0" y="578.0" width="6.0" height="5.0" rx="3" fill="#2A2F3A"/>
+  <rect x="475.0" y="578.0" width="22.0" height="5.0" rx="3" fill="#E8A83C"/>
+  <rect x="504.0" y="578.0" width="6.0" height="5.0" rx="3" fill="#2A2F3A"/>
+  <rect x="517.0" y="578.0" width="6.0" height="5.0" rx="3" fill="#2A2F3A"/>
+  <rect x="530.0" y="578.0" width="6.0" height="5.0" rx="3" fill="#2A2F3A"/>
+  <rect x="543.0" y="578.0" width="6.0" height="5.0" rx="3" fill="#2A2F3A"/>
+  <rect x="556.0" y="578.0" width="6.0" height="5.0" rx="3" fill="#2A2F3A"/>
+</svg>

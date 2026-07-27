@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="600" viewBox="0 0 1024 600">
+  <rect width="1024" height="600" fill="#0E1015"/>
+  <rect x="72.0" y="58.0" width="9.0" height="9.0" rx="2" fill="#E8A83C"/>
+  <text x="90.0" y="68.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="13" font-weight="600" fill="#9BA2B0" text-anchor="start">NovaPanel</text>
+  <text x="72.0" y="104.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="11" font-weight="400" fill="#E8A83C" text-anchor="start">Passo 2 de 3</text>
+  <rect x="72.0" y="114.0" width="66.0" height="2.0" rx="1" fill="#E8A83C"/>
+  <rect x="148.0" y="114.0" width="66.0" height="2.0" rx="1" fill="#E8A83C"/>
+  <rect x="224.0" y="114.0" width="66.0" height="2.0" rx="1" fill="#2C313C"/>
+  <text x="72.0" y="172.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="40" font-weight="500" fill="#F2F4F8" text-anchor="start">Fuso horário e formato</text>
+  <text x="72.0" y="202.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="14" font-weight="600" fill="#9BA2B0" text-anchor="start">A hora vem do NTP. O fuso só decide como ela aparece.</text>
+  <text x="72.0" y="288.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="11" font-weight="400" fill="#6A7180" text-anchor="start">Fuso horário</text>
+  <text x="72.0" y="326.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="30" font-weight="500" fill="#F2F4F8" text-anchor="start">America/Sao_Paulo</text>
+  <text x="72.0" y="352.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#6A7180" text-anchor="start">UTC-3 · detectado pela rede</text>
+  <text x="72.0" y="378.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#E8A83C" text-anchor="start">Trocar fuso ›</text>
+  <text x="72.0" y="428.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="11" font-weight="400" fill="#6A7180" text-anchor="start">Formato da hora</text>
+  <rect x="72.0" y="440.0" width="96.0" height="34.0" rx="8" fill="#3A2E12"/>
+  <text x="120.0" y="462.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="14" font-weight="400" fill="#E8A83C" text-anchor="middle">24 h</text>
+  <rect x="176.0" y="440.0" width="96.0" height="34.0" rx="8" fill="#181C24"/>
+  <text x="224.0" y="462.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="14" font-weight="400" fill="#6A7180" text-anchor="middle">12 h</text>
+  <text x="72.0" y="516.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="13" font-weight="400" fill="#9BA2B0" text-anchor="start">‹ Voltar</text>
+  <rect x="560.0" y="270.0" width="1.0" height="220.0" rx="0" fill="#232833"/>
+  <text x="600.0" y="288.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="11" font-weight="400" fill="#6A7180" text-anchor="start">Como vai aparecer</text>
+  <text x="600.0" y="366.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="68" font-weight="300" fill="#F2F4F8" text-anchor="start" letter-spacing="-2">00:55</text>
+  <text x="600.0" y="398.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="15" font-weight="400" fill="#9BA2B0" text-anchor="start">Sábado, 25 de julho</text>
+  <rect x="752.0" y="452.0" width="200.0" height="48.0" rx="10" fill="#E8A83C"/>
+  <text x="852.0" y="482.0" font-family="Inter, 'Segoe UI', Roboto, Helvetica, sans-serif" font-size="16" font-weight="600" fill="#12140F" text-anchor="middle">Avançar</text>
+</svg>
