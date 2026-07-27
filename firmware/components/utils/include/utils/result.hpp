@@ -13,6 +13,7 @@
 #pragma once
 
 #include <cassert>
+#include <optional>
 #include <utility>
 
 #include "utils/status.hpp"
@@ -28,26 +29,27 @@ public:
     static Result ok(T value) { return Result(std::move(value), Status::kOk); }
     static Result fail(Status s) {
         assert(s != Status::kOk && "fail(kOk) e contradicao");
-        return Result(T{}, s);
+        return Result(std::nullopt, s);
     }
 
     bool is_ok() const { return status_ == Status::kOk; }
     Status status() const { return status_; }
 
     // Ler o valor de um Result falho é BUG do chamador. Em dev o assert aponta
-    // o local exato; em release devolve o valor default, que é preferível a
-    // memória indeterminada. Prefira `value_or()` quando a falha for esperada.
+    // o local exato. Em release a pré-condição continua a mesma; prefira
+    // `value_or()` quando a falha for esperada.
     const T& value() const {
         assert(is_ok() && "value() em Result falho — cheque is_ok() antes");
-        return value_;
+        return *value_;
     }
 
-    T value_or(T fallback) const { return is_ok() ? value_ : fallback; }
+    T value_or(T fallback) const { return is_ok() ? *value_ : fallback; }
 
 private:
     Result(T v, Status s) : value_(std::move(v)), status_(s) {}
+    Result(std::nullopt_t, Status s) : value_(std::nullopt), status_(s) {}
 
-    T value_;
+    std::optional<T> value_;
     Status status_;
 };
 

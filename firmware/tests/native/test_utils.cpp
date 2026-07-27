@@ -82,6 +82,15 @@ struct Payload {
     char tag_[8] = {};
 };
 
+// Provider models podem exigir dados obrigatórios. Result<T>::fail() não pode
+// exigir um construtor padrão que o domínio não precisa.
+struct RequiredValue {
+    explicit RequiredValue(int number) : number_(number) {}
+    RequiredValue() = delete;
+
+    int number_;
+};
+
 void test_result_struct() {
     using namespace nova::utils;
     Payload p;
@@ -96,6 +105,17 @@ void test_result_struct() {
     check(!f.is_ok(), "Result<struct> falho");
     check(f.value_or(Payload{}).a_ == 0, "value_or devolve o fallback em struct");
 }
+
+void test_result_without_default_constructor() {
+    using namespace nova::utils;
+    Result<RequiredValue> good = Result<RequiredValue>::ok(RequiredValue(9));
+    check(good.is_ok() && good.value().number_ == 9,
+          "Result aceita tipo sem construtor padrao no sucesso");
+
+    Result<RequiredValue> bad = Result<RequiredValue>::fail(Status::kMalformed);
+    check(!bad.is_ok() && bad.status() == Status::kMalformed,
+          "Result falho nao constroi tipo sem construtor padrao");
+}
 }  // namespace
 
 int main() {
@@ -105,6 +125,7 @@ int main() {
     test_result_value();
     test_result_void();
     test_result_struct();
+    test_result_without_default_constructor();
     if (g_fail == 0) {
         std::printf("  PASS (todos)\n");
         return 0;

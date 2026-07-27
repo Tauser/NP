@@ -68,6 +68,10 @@ como entregue sem todos os critérios atendidos e este arquivo atualizado.**
   - `main/` — `app_main` magro delega para `nova::app::run()` (`boot.cpp`):
     display → primeiro frame → **backlight só depois do primeiro frame**.
   - `firmware/tests/native/` — testes nativos (`test_all.cpp`) da lógica pura.
+  - `components/utils/` — `Status` e `Result<T>` puros, sem exceções nem
+    alocação dinâmica; `Result<T>` aceita tipos de domínio sem construtor
+    padrão inclusive no caminho de falha. Host check e testes nativos passam
+    em 2026-07-27; `idf.py build` desta revisão ainda não foi verificado.
 - **Gates**: `tools/scripts/` — `host_check`, `arch_check`, `size_check`,
   `ui_check`, `hygiene`, `check_all`.
 
