@@ -7,6 +7,8 @@ idf_component_register(
         "src/event_bus.cpp"
         "src/state_store.cpp"
         "src/action_queue.cpp"
+        "src/ui_dispatcher.cpp"
+        "src/pump.cpp"
     INCLUDE_DIRS "include"
     REQUIRES
         models

@@ -28,6 +28,8 @@ INC=(
   "$FW/components/core/src/event_bus.cpp" \
   "$FW/components/core/src/state_store.cpp" \
   "$FW/components/core/src/action_queue.cpp" \
+  "$FW/components/core/src/ui_dispatcher.cpp" \
+  "$FW/components/core/src/pump.cpp" \
   -o "$OUT/test_core"
 
 "$OUT/test_all"

@@ -6,6 +6,11 @@
 #include "boot.hpp"
 
 #include "board/waveshare_board.hpp"
+#include "core/event_bus.hpp"
+#include "core/lock.hpp"
+#include "core/pump.hpp"
+#include "core/state_store.hpp"
+#include "core/ui_dispatcher.hpp"
 #include "diag/boot_diag.hpp"
 #include "diag/flash_thrash.hpp"
 #include "diag/render_probe.hpp"
@@ -40,6 +45,11 @@ constexpr uint32_t kDumpPeriodMs = 5000;
 constexpr int kBootBrightnessPct = 80;
 constexpr int kFirstFrameTimeoutMs = 3000;
 
+// Período do tick da `app_loop`. Ela não renderiza e não faz busy-wait: dorme
+// de verdade entre ciclos, porque consumo em repouso define a temperatura de
+// regime num produto 24/7 (RESOURCE-BUDGET §8).
+constexpr uint32_t kTickPeriodMs = 100;
+
 #ifdef NOVA_FLASH_THRASH
 // Erase a cada 500 ms: frequente o bastante para casar com o render, espaçado
 // o bastante para o olho/vídeo ligar UMA piscada a UM erase (§3.1).
@@ -73,6 +83,8 @@ void backlight_after_first_frame(board::IBoard& board) {
     board.set_brightness(kBootBrightnessPct);
 }
 }  // namespace
+
+void app_loop(board::IBoard& hw);  // definida abaixo; não retorna
 
 void run() {
     ESP_LOGI(kTag, "NovaPanel — baseline 2026-07 — Onda 0 (atribuir glitch)");
@@ -109,6 +121,49 @@ void run() {
     // do render, para a bisseção do §3.2 (hipótese 2.5).
     diag::start_flash_thrash(kFlashThrashPeriodMs);
 #endif
+
+    app_loop(board);  // não retorna
+}
+
+// Ciclo da `app_loop` (ARCHITECTURE §5): a ÚNICA task que publica no EventBus e
+// despacha invalidação de UI. Não renderiza — render é da task de UI (ADR-011).
+//
+// O passo do ciclo é `core::pump_once`, o MESMO código exercitado pelos testes
+// de host. Reimplementar a sequência aqui faria os testes validarem uma cópia.
+void app_loop(board::IBoard& hw) {
+    // Lock da HAL: o núcleo não conhece FreeRTOS, então recebe o mecanismo por
+    // injeção. `lock_ui` é o lock semântico do display/UI (RESOURCE-BUDGET §6).
+    class BoardLock : public core::ILock {
+    public:
+        explicit BoardLock(board::IBoard& b) : b_(b) {}
+        void lock() override { b_.lock_ui(0); }
+        void unlock() override { b_.unlock_ui(); }
+
+    private:
+        board::IBoard& b_;
+    };
+
+    static BoardLock lock(hw);
+    static core::EventBus bus;
+    static core::StateStore store(lock);
+    static core::UiDispatcher dispatcher;
+
+    if (!bus.subscribe(core::UiDispatcher::on_event, &dispatcher)) {
+        ESP_LOGE(kTag, "dispatcher nao assinou o EventBus — UI nao atualizaria");
+    }
+
+    // Ainda NÃO há tela registrada: telas são da Onda C (ADR-023). O ciclo roda
+    // vazio de propósito — o caminho está fechado e instrumentado, e a primeira
+    // tela só precisa se registrar no dispatcher.
+    ESP_LOGI(kTag, "app_loop iniciada (0 telas registradas; ver ADR-023)");
+
+    for (;;) {
+        const size_t invalidated = core::pump_once(store, bus, dispatcher);
+        if (invalidated > 0) {
+            ESP_LOGD(kTag, "tick: %u telas invalidadas", static_cast<unsigned>(invalidated));
+        }
+        vTaskDelay(pdMS_TO_TICKS(kTickPeriodMs));
+    }
 }
 
 }  // namespace app

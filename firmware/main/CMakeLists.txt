@@ -6,6 +6,7 @@ idf_component_register(
     REQUIRES
         # main/ é wiring: monta e conecta (docs/ARCHITECTURE.md §3).
         board
+        core
         diag
         esp_lvgl_adapter
 )

@@ -6,3 +6,5 @@ components/diag/src/boot_report.cpp
 components/core/src/event_bus.cpp
 components/core/src/state_store.cpp
 components/core/src/action_queue.cpp
+components/core/src/ui_dispatcher.cpp
+components/core/src/pump.cpp
