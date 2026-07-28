@@ -8,8 +8,16 @@ FW="$(cd "$HERE/../.." && pwd)"
 CXX="${CXX:-g++}"
 OUT="$(mktemp -d "${TMPDIR:-/tmp}/novapanel-nat.XXXXXX")"
 trap 'rm -rf "$OUT"' EXIT
+SHIM="$OUT/shim"
+mkdir -p "$SHIM"
+printf '%s\n' '#pragma once' '#define ESP_LOGD(...) do {} while (0)' \
+  '#define ESP_LOGI(...) do {} while (0)' '#define ESP_LOGW(...) do {} while (0)' \
+  '#define ESP_LOGE(...) do {} while (0)' > "$SHIM/esp_log.h"
+printf '%s\n' '#pragma once' '#include <cstdint>' \
+  'static inline int64_t esp_timer_get_time() { return 0; }' > "$SHIM/esp_timer.h"
 
 INC=(
+  -I"$SHIM"
   -I"$FW/components/board/include"
   -I"$FW/components/cache/include"
   -I"$FW/components/diag/include"
@@ -90,6 +98,17 @@ INC=(
   -o "$OUT/test_weather_cache"
 
 "$CXX" -std="${CXXSTD:-c++17}" -Wall -Wextra -Werror "${INC[@]}" \
+  "$HERE/test_weather_service.cpp" \
+  "$FW/components/core/src/state_store.cpp" \
+  "$FW/components/core/src/request_orchestrator.cpp" \
+  "$FW/components/cache/src/weather_cache_codec.cpp" \
+  "$FW/components/services/src/network_worker.cpp" \
+  "$FW/components/services/src/weather_service.cpp" \
+  "$FW/components/utils/src/http_client.cpp" \
+  "$FW/components/utils/src/status.cpp" \
+  -o "$OUT/test_weather_service"
+
+"$CXX" -std="${CXXSTD:-c++17}" -Wall -Wextra -Werror "${INC[@]}" \
   "$HERE/test_clock_service.cpp" \
   "$FW/components/core/src/state_store.cpp" \
   "$FW/components/services/src/clock_service.cpp" \
@@ -119,6 +138,7 @@ INC=(
 "$OUT/test_time_provider"
 "$OUT/test_open_meteo_weather_provider"
 "$OUT/test_weather_cache"
+"$OUT/test_weather_service"
 "$OUT/test_clock_service"
 "$OUT/test_setup_service"
 "$OUT/test_screen_registry"

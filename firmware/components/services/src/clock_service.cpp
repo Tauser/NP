@@ -1,7 +1,12 @@
 #include "services/clock_service.hpp"
 
+#include "esp_log.h"
+
 namespace nova {
 namespace services {
+namespace {
+constexpr const char* kTag = "clock";
+}
 
 ClockService::ClockService(core::StateStore& store, board::IBoard& board, Config config)
     : store_(store), board_(board), config_(config) {}
@@ -15,9 +20,14 @@ utils::Status ClockService::start() {
     if (!is_plausible_utc(rtc_time_s)) {
         // O estado inicial ja e indisponivel. Nao ha erro de boot: o painel
         // segue operacional e a sincronizacao NTP futura podera corrigi-lo.
+        ESP_LOGW(kTag, "RTC sem hora plausivel no boot; aguardando NTP");
         return utils::Status::kOk;
     }
     publish_clock(rtc_time_s, 0, models::ClockSource::kRtc);
+    const models::ClockState clock = store_.clock();
+    (void)clock;  // o shim de log do host descarta os argumentos variádicos.
+    ESP_LOGI(kTag, "RTC valido no boot: hora local=%02u:%02u fonte=RTC",
+             static_cast<unsigned>(clock.hour_), static_cast<unsigned>(clock.minute_));
     return utils::Status::kOk;
 }
 

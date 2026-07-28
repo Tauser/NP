@@ -3,6 +3,7 @@
 #include <ctime>
 
 #include "esp_log.h"
+#include "esp_timer.h"
 
 namespace nova {
 namespace services {
@@ -81,12 +82,18 @@ void WeatherService::save_cache(uint64_t now_utc_s) {
     const models::WeatherState weather = store_.weather();
     if (!weather.valid_ || weather.source_ != models::WeatherSource::kLive) return;
     const cache::WeatherCacheEntry entry{weather, now_utc_s};
+    ESP_LOGI(kTag, "cache: escrita iniciada; observe o display");
+    const int64_t started_us = esp_timer_get_time();
     const utils::Status saved = cache_.save(entry);
+    const int64_t elapsed_us = esp_timer_get_time() - started_us;
+    (void)elapsed_us;  // O shim de log do host descarta varargs.
     if (saved == utils::Status::kOk) {
         saved_cache_utc_s_ = now_utc_s;
-        ESP_LOGI(kTag, "cache salvo; proxima escrita em >=30 min");
+        ESP_LOGI(kTag, "cache salvo em %lld us; proxima escrita em >=30 min",
+                 static_cast<long long>(elapsed_us));
     } else {
-        ESP_LOGW(kTag, "cache nao salvo: %s", utils::to_string(saved));
+        ESP_LOGW(kTag, "cache nao salvo em %lld us: %s", static_cast<long long>(elapsed_us),
+                 utils::to_string(saved));
     }
 }
 

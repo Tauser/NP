@@ -51,6 +51,12 @@ void test_rejects_corruption() {
     const auto truncated = nova::cache::WeatherCacheCodec::decode(blob, sizeof(blob) - 1);
     check(!truncated.is_ok() && truncated.status() == nova::utils::Status::kMalformed,
           "tamanho truncado rejeitado");
+
+    nova::cache::WeatherCacheCodec::encode(sample(), blob, sizeof(blob));
+    blob[4] = 2;  // versão futura: deve falhar fechada antes de ler o payload.
+    const auto future = nova::cache::WeatherCacheCodec::decode(blob, sizeof(blob));
+    check(!future.is_ok() && future.status() == nova::utils::Status::kMalformed,
+          "schema futuro e ignorado sem usar dado antigo");
 }
 
 void test_throttle() {

@@ -14,6 +14,7 @@
 // O BSP continua criando o painel DSI; só o backend de LVGL mudou.
 #include "board/waveshare_board.hpp"
 
+#include <ctime>
 #include <cstring>
 
 #include "bsp/display.h"
@@ -294,8 +295,10 @@ void WaveshareBoard::unlock_shared_i2c() { esp_lv_adapter_unlock(); }
 void WaveshareBoard::set_brightness(int pct) { bsp_display_brightness_set(pct); }
 
 uint64_t WaveshareBoard::rtc_unix_time_s() {
-    // RTC com bateria entra na Onda A (ADR-015). Por ora, sem fonte plausível.
-    return 0;
+    // O SDK usa RTC+HRT para manter o epoch entre resets; ClockService valida
+    // a plausibilidade antes de publicar a hora para o restante da aplicação.
+    const std::time_t now = std::time(nullptr);
+    return now > 0 ? static_cast<uint64_t>(now) : 0;
 }
 
 DrawBufferReport WaveshareBoard::describe_draw_buffers() {

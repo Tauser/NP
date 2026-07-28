@@ -30,7 +30,7 @@
 ```text
 Onda 0 - Atribuir o glitch de render                 [FECHADA — causa atribuída e corrigida]
 Onda A - Fundação: esqueleto, HAL, CI, render limpo  [em andamento — HAL, render, core/, utils/, orquestrador, ServiceManager, transporte/worker HTTP, setup Wi-Fi/NTP/TLS em placa, provider de clima com fixtures e shell/registro de UI prontos; telas de produto e fechamento da onda pendentes]
-Onda B - Dados reais, cache offline e degradação     [em andamento — cache offline de clima validado em placa; fault injection e demais critérios pendentes]
+Onda B - Dados reais, cache offline e degradação     [FECHADA — todos os critérios de saída validados]
 Onda C - Telas do produto                            [não iniciada]
 Onda D - Robustez comprovável e observabilidade      [não iniciada]
 Onda E - Segurança, OTA e release                    [não iniciada]
@@ -180,7 +180,35 @@ como entregue sem todos os critérios atendidos e este arquivo atualizado.**
     flashed com hash verificado. O operador confirmou a montagem e a primeira
     escrita do cache em bancada. O operador confirmou também o reboot sem
     Wi-Fi: o mesmo dado foi carregado do cache com `stale=true`. A validação
-    visual de eventual piscada durante a escrita ainda não foi medida.
+    visual de eventual piscada durante a escrita ainda não foi medida. A suíte
+    de fault injection da `TESTING.md` §4 agora roda no host no fluxo completo
+    `provider → worker → WeatherService → StateStore`: Wi-Fi ausente usa cache
+    stale; DNS e HTTP falhos abrem/recuperam breaker; payload inválido preserva
+    estado; cache corrompido/schema futuro é descartado; o overflow da fila já
+    é coberto por `test_core`. `host_check --app --tests`, `arch_check` e
+    `idf.py build` passaram em 2026-07-28 (`novapanel.bin` 0x1665e0, 83 %
+    livre). A primeira flash da instrumentação RTC registrou `clock: RTC sem
+    hora plausivel no boot`; a causa foi identificada como HAL incompleta:
+    `WaveshareBoard::rtc_unix_time_s()` devolvia zero. A revisão atual lê o
+    epoch do relógio de sistema configurado como RTC+HRT, mantendo a validação
+    de plausibilidade no `ClockService`. `host_check --app --tests`,
+    `arch_check` e build alvo passaram em 2026-07-28 (`novapanel.bin`
+    0x1666d0, 82 % livre). A validação em placa foi concluída: após sincronizar
+    por NTP, o operador desligou completamente a USB por 30--60 s e reiniciou
+    sem rede; o boot registrou `clock: RTC valido no boot: hora local=15:36
+    fonte=RTC`. Falta apenas medir visualmente eventual piscada durante a
+    escrita do cache. A revisão atual adiciona marcadores de início e fim,
+    com duração em microssegundos, exclusivamente em torno da escrita real
+    já limitada a uma por 30 min; não cria escrita extra nem toca a UI.
+    `host_check --app --tests`, `arch_check` e build alvo passaram em
+    2026-07-28 (`novapanel.bin` 0x166780, 82 % livre). O operador a flashed;
+    a primeira resposta live confirmou o fluxo, mas a escrita foi corretamente
+    bloqueada pelo intervalo de 30 min. Na primeira escrita elegível, o log
+    mediu `cache salvo em 171010 us`; o operador não observou piscada no
+    display entre o início e o fim da operação. Todos os critérios da Onda B
+    estão fechados: cache stale em boot offline, fault injection no host,
+    fixtures real/malformada/truncada no CI, onboarding com reconexão e hora
+    válida pelo RTC sem rede.
   - `components/ui/` — `ScreenRegistry` puro aceita specs uma vez, recusa
     duplicata/capacidade excedida e é selado antes do Shell. O Shell registra
     invalidações no `UiDispatcher` sem tocar LVGL; um timer que roda na
@@ -374,13 +402,12 @@ Resumo do que é considerado **provado**:
 - ~~Glitch de render sem causa atribuída~~ — **RESOLVIDO** (ADR-024/025/026).
   Causa-raiz: o DSI fica sem dados ao ler o framebuffer. Duas das três vias
   estão corrigidas; a terceira é limite de hardware, abaixo.
-- **Erase de flash provoca piscada branca — SEM CORREÇÃO POSSÍVEL.** O flash
-  desta placa (GD `0xC84019`) não implementa suspend, e num painel 24/7 não
-  existe janela sem render. **Cada escrita de flash em runtime custa uma
-  piscada.** Vira restrição dura do `RESOURCE-BUDGET.md` §4 (dedup de NVS,
-  cache no máximo 1×/30 min, nenhuma escrita disparada por toque). Toda feature
+- **Erase de flash pode provocar piscada branca.** O flash desta placa (GD
+  `0xC84019`) não implementa suspend, e num painel 24/7 não existe janela sem
+  render. A primeira escrita LittleFS real do cache (171.010 us) não mostrou
+  piscada observável, mas a mitigação continua obrigatória: dedup de NVS,
+  cache no máximo 1×/30 min e nenhuma escrita disparada por toque. Toda feature
   que escreva flash declara o custo em piscadas **antes** de entrar (ADR-009).
-  **Risco vivo para a Onda B**, quando cache e NVS passarem a existir.
 - **Fetch de glyph em flash também rouba banda do DSI** (RESOURCE-BUDGET §1.2).
   Mitigação é disciplina de UI, não configuração: subsetting de fonte e
   minimizar a área invalidada (o baseline anterior usava um label por dígito no
@@ -394,6 +421,10 @@ Resumo do que é considerado **provado**:
 
 ## Histórico de fechamento de ondas
 
+- **Onda B — Dados reais, cache e degradação (2026-07-28): fechada.** Cache
+  offline stale, retries/breaker/corrupção no host, fixtures de provider,
+  onboarding persistido, RTC sem rede e escrita LittleFS real foram validados.
+  A escrita do cache levou 171.010 us e não produziu piscada observável.
 - **Onda 0 — Atribuir o glitch (2026-07-26): fechada por ATRIBUIÇÃO.** Dois
   defeitos nomeados com mecanismo e reprodução falsificável (ADR-024): (1)
   piscada branca = underrun do DSI por erase de flash no MSPI; (2) tearing de
