@@ -17,9 +17,6 @@ jobs:
   build:
     name: Build no alvo (esp32p4)
     runs-on: ubuntu-latest
-    # Roda só quando já existir componente de firmware; antes da Onda A o
-    # projeto é documentação e scaffolding, e um build vazio não prova nada.
-    if: hashFiles('firmware/components/**/CMakeLists.txt') != ''
     steps:
       - uses: actions/checkout@v4
 
