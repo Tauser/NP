@@ -29,7 +29,7 @@
 
 ```text
 Onda 0 - Atribuir o glitch de render                 [FECHADA — causa atribuída e corrigida]
-Onda A - Fundação: esqueleto, HAL, CI, render limpo  [em andamento — HAL, render, core/, utils/, orquestrador, ServiceManager, transporte/worker HTTP, setup Wi-Fi/NTP/TLS em placa, provider de clima com fixtures e shell/registro de UI prontos; telas de produto e fechamento da onda pendentes]
+Onda A - Fundação: esqueleto, HAL, CI, render limpo  [em fechamento — critérios locais e bancada validados; aguardando CI remoto deste commit]
 Onda B - Dados reais, cache offline e degradação     [FECHADA — todos os critérios de saída validados]
 Onda C - Telas do produto                            [não iniciada]
 Onda D - Robustez comprovável e observabilidade      [não iniciada]
