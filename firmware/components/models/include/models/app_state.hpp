@@ -31,17 +31,65 @@ enum class NetworkState : uint8_t {
     kUp,
 };
 
+enum class WifiSetupPhase : uint8_t {
+    kUnconfigured = 0,
+    kAssociating,
+    kConnected,
+    kFailed,
+};
+
+struct WifiSetupState {
+    uint64_t last_change_ms_ = 0;
+    WifiSetupPhase phase_ = WifiSetupPhase::kUnconfigured;
+    bool has_saved_credentials_ = false;
+};
+
+enum class ClockSource : uint8_t {
+    kUnavailable = 0,
+    kRtc,
+    kNtp,
+};
+
 struct ClockState {
     // Hora local já resolvida. `valid_` falso = sem hora plausível; a UI mostra
     // estado não-sincronizado e NUNCA inventa data (ADR-015).
+    uint64_t last_update_ms_ = 0;
     uint8_t hour_ = 0;
     uint8_t minute_ = 0;
+    ClockSource source_ = ClockSource::kUnavailable;
     bool valid_ = false;
+    // RTC e NTP são fontes utilizáveis enquanto existirem; uma futura camada de
+    // cache deve marcar este campo antes de publicar hora persistida.
+    bool stale_ = true;
 };
+
+// Condição atual compacta para a primeira tela de clima. Temperaturas e vento
+// são decimais para não introduzir ponto flutuante no estado/UI.
+enum class WeatherSource : uint8_t {
+    kUnavailable = 0,
+    kLive,
+    kCache,
+    kMock,
+};
+
+struct WeatherState {
+    uint64_t last_update_ms_ = 0;
+    int16_t temperature_deci_c_ = 0;
+    int16_t apparent_temperature_deci_c_ = 0;
+    uint16_t wind_speed_deci_kmh_ = 0;
+    uint8_t weather_code_ = 0;
+    WeatherSource source_ = WeatherSource::kUnavailable;
+    bool is_day_ = false;
+    bool valid_ = false;
+    bool stale_ = true;
+};
+static_assert(sizeof(WeatherState) == 24, "WeatherState deve permanecer compacto");
 
 struct AppState {
     ClockState clock_;
     NetworkState network_ = NetworkState::kDown;
+    WifiSetupState wifi_setup_;
+    WeatherState weather_;
 };
 
 }  // namespace models

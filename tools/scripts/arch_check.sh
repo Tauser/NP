@@ -44,11 +44,11 @@ assert_allowed ui        core models lvgl
 # services pode usar as bordas de rede do ESP-IDF, mas continua proibido de
 # depender de UI ou de adaptador concreto de provider. A lista explícita evita
 # que "serviço" vire passe livre para qualquer componente.
-assert_allowed services  core models cache providers utils board esp_http_client esp-tls esp_timer mbedtls
+assert_allowed services  core models cache providers utils board esp_http_client esp-tls esp_timer esp_netif mbedtls nvs_flash
 assert_allowed providers models utils
 assert_allowed core      models utils
 assert_allowed models
-assert_allowed cache     utils
+assert_allowed cache     models utils esp_partition joltwallet__littlefs
 
 assert_no_include ui        '"(i_board|mock_board|waveshare_board|.*_provider)\.hpp"'
 assert_no_include providers '"(event_bus|state_store|ui_dispatcher|screen_|i_board)\.hpp"'

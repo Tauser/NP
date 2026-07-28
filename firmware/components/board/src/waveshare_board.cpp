@@ -14,6 +14,8 @@
 // O BSP continua criando o painel DSI; só o backend de LVGL mudou.
 #include "board/waveshare_board.hpp"
 
+#include <cstring>
+
 #include "bsp/display.h"
 #include "bsp/esp-bsp.h"
 #include "esp_lcd_mipi_dsi.h"
@@ -21,6 +23,9 @@
 #include "esp_lv_adapter.h"
 #include "esp_lv_adapter_display.h"
 #include "esp_hosted.h"
+#include "esp_event.h"
+#include "esp_netif.h"
+#include "esp_wifi.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "lvgl.h"
@@ -174,6 +179,83 @@ bool WaveshareBoard::start_network_transport_async() {
 }
 
 bool WaveshareBoard::network_transport_ready() const { return transport_ready_.load(); }
+
+bool WaveshareBoard::start_wifi_station(const WifiCredentials& credentials) {
+    if (!transport_ready_.load() || credentials.ssid_[0] == '\0') {
+        return false;
+    }
+    if (!wifi_initialized_) {
+        const esp_err_t netif = esp_netif_init();
+        if (netif != ESP_OK && netif != ESP_ERR_INVALID_STATE) {
+            ESP_LOGE(kTag, "esp_netif_init falhou: %d", netif);
+            wifi_state_.store(WifiConnectionState::kFailed);
+            return false;
+        }
+        const esp_err_t loop = esp_event_loop_create_default();
+        if (loop != ESP_OK && loop != ESP_ERR_INVALID_STATE) {
+            ESP_LOGE(kTag, "event loop Wi-Fi falhou: %d", loop);
+            wifi_state_.store(WifiConnectionState::kFailed);
+            return false;
+        }
+        wifi_netif_ = esp_netif_create_default_wifi_sta();
+        if (wifi_netif_ == nullptr ||
+            esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, wifi_event_handler, this) != ESP_OK ||
+            esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, wifi_event_handler, this) != ESP_OK) {
+            ESP_LOGE(kTag, "nao preparou eventos Wi-Fi");
+            wifi_state_.store(WifiConnectionState::kFailed);
+            return false;
+        }
+        wifi_init_config_t init = WIFI_INIT_CONFIG_DEFAULT();
+        if (esp_wifi_init(&init) != ESP_OK || esp_wifi_set_storage(WIFI_STORAGE_RAM) != ESP_OK ||
+            esp_wifi_set_mode(WIFI_MODE_STA) != ESP_OK) {
+            ESP_LOGE(kTag, "nao inicializou Wi-Fi remoto");
+            wifi_state_.store(WifiConnectionState::kFailed);
+            return false;
+        }
+        wifi_initialized_ = true;
+    }
+
+    wifi_config_t config = {};
+    std::strncpy(reinterpret_cast<char*>(config.sta.ssid), credentials.ssid_, sizeof(config.sta.ssid) - 1);
+    std::strncpy(reinterpret_cast<char*>(config.sta.password), credentials.passphrase_,
+                 sizeof(config.sta.password) - 1);
+    config.sta.threshold.authmode = WIFI_AUTH_WPA2_PSK;
+    if (esp_wifi_set_config(WIFI_IF_STA, &config) != ESP_OK) {
+        ESP_LOGE(kTag, "configuracao de Wi-Fi rejeitada");
+        wifi_state_.store(WifiConnectionState::kFailed);
+        return false;
+    }
+    wifi_state_.store(WifiConnectionState::kAssociating);
+    if (!wifi_started_) {
+        if (esp_wifi_start() != ESP_OK) {
+            ESP_LOGE(kTag, "esp_wifi_start falhou");
+            wifi_state_.store(WifiConnectionState::kFailed);
+            return false;
+        }
+        wifi_started_ = true;
+    }
+    if (esp_wifi_connect() != ESP_OK) {
+        ESP_LOGE(kTag, "esp_wifi_connect falhou");
+        wifi_state_.store(WifiConnectionState::kFailed);
+        return false;
+    }
+    return true;
+}
+
+WifiConnectionState WaveshareBoard::wifi_connection_state() const { return wifi_state_.load(); }
+
+void WaveshareBoard::wifi_event_handler(void* context, const char* event_base, int32_t event_id,
+                                         void* event_data) {
+    (void)event_data;
+    auto* board = static_cast<WaveshareBoard*>(context);
+    if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
+        board->wifi_state_.store(WifiConnectionState::kConnected);
+        ESP_LOGI(kTag, "Wi-Fi associado e com IP");
+    } else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED) {
+        board->wifi_state_.store(WifiConnectionState::kFailed);
+        ESP_LOGW(kTag, "Wi-Fi desconectado; aguardando retry do SetupService");
+    }
+}
 
 void WaveshareBoard::network_transport_task(void* context) {
     auto* board = static_cast<WaveshareBoard*>(context);

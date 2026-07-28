@@ -412,3 +412,113 @@ framebuffers = **3,6 MB de PSRAM** (de ~30 MB livres); custo de render a medir.
 **pesquisa do autor do projeto**, não do agente — que vinha tentando contornar a
 limitação do `esp_lvgl_port` em vez de substituí-lo. A consulta ao baseline v1
 (que revelou o mecanismo de *glyph miss*) também partiu dele.
+
+## ADR-027 — Fundação de setup Wi-Fi sem superfície de escuta
+
+**Decisão:** o `SetupService` é o dono do ciclo `Unconfigured → Associating →
+Connected|Failed`. A credencial é um valor transitório de `IBoard`, nunca um
+campo de `AppState` ou evento. O ESP-WiFi remoto usa `WIFI_STORAGE_RAM`; a
+persistência explícita é `wifi_cfg/v1` em NVS somente após 30 s com IP estável.
+Falhas de associação usam backoff de 2 s até 30 s e nunca persistem senha.
+
+**Motivo:** a P4 depende do C6/ESP-Hosted e uma reconexão não pode disputar o
+render com rajadas de NVS. A disciplina de atraso, deduplicação e escrita fora
+de callback de toque respeita a limitação física conhecida: cada commit pode
+causar uma piscada branca (ADR-025). Separar o segredo do estado preserva o
+contrato de UI e evita vazamento em log, evento ou render.
+
+**Consequências:** o boot continua offline se NVS estiver indisponível ou se o
+schema for futuro; não há erase automático. A HAL só começa a estação depois do
+enlace P4↔C6 e publica o resultado por estado atômico; o serviço atualiza o
+`StateStore`. Não há ainda canal de entrada de credencial, SoftAP, captive
+portal nem endpoint HTTP: escolher um deles é decisão de superfície de ataque
+posterior, não um atalho para colocar senha no firmware.
+
+## ADR-028 — Provisionamento por USB físico, sem portal de rede
+
+**Decisão:** a primeira entrada de credencial é o frame local `NPW1
+<ssid-base64> <senha-base64>` pela USB serial. `UsbWifiProvisioner` roda em
+task própria de 4 KiB/prioridade 2, valida apenas a forma do frame e envia a
+credencial por mailbox de uma vaga, protegido pelo mutex do núcleo. Somente a
+`app_loop`, dentro de `SetupService::tick()`, consome a caixa e decide
+associar. O frame e a senha nunca são logados, publicados nem ecoados.
+
+**Motivo:** permite a primeira associação sem abrir SoftAP, captive portal ou
+porta LAN — superfícies que exigiriam autenticação e política próprias. Base64
+é usado para delimitar bytes e não é tratado como proteção criptográfica; a
+confidencialidade é o cabo físico e o host confiável, ambos dentro do modelo de
+ameaça atual. A caixa separa a task de I/O da dona do estado, sem chamar serviço
+de callback de driver.
+
+**Consequências:** nesta Waveshare, a única USB física do P4 usa
+USB Serial/JTAG como console **primário**, não saída secundária: só o console
+primário entrega `stdin`, requisito para o frame local. O monitor serial deve
+ficar fechado enquanto o utilitário local abre a COM. A senha pode existir
+transitoriamente no host e no cabo, mas não no log, repositório, `AppState` ou
+`EventBus`. A alternativa remota continua fora do escopo e requer ADR nova; a
+escrita NVS permanece após 30 s com IP.
+
+## ADR-029 — NTP antes da primeira sonda HTTPS
+
+**Decisão:** `SntpService` inicia o SNTP somente após IP e entrega UTC à
+`ClockService` dentro da `app_loop`; nenhum callback de rede escreve estado.
+A sonda de bancada HTTPS só é habilitada depois que o `ClockState` aponta NTP
+e é executada pelo único `NetworkWorker`, com o mesmo corpo de 48 KiB já
+orçado. Em bancada, ela faz três consultas seriadas a `https://example.com/`
+e então se desabilita até o próximo boot. Cada uma mede heap interno
+antes/mínimo/durante/depois.
+
+**Motivo:** certificados TLS exigem relógio plausível. Esta ordem impede uma
+falha de certificado mascarar um problema de conectividade e preserva a regra
+de um handshake HTTPS por vez. SNTP é tráfego UDP de infraestrutura, sem heap
+TLS e sem concorrência com o worker HTTPS.
+
+**Consequências:** sem Wi-Fi ou SNTP, o painel continua offline e a sonda não
+abre socket. Falhas HTTPS entram no breaker do orquestrador; o resultado não
+carrega payload para estado, tela ou log.
+
+## ADR-030 — Primeiro dado real: clima de Brasília/DF via Open-Meteo
+
+**Decisão:** o primeiro provider de produto é `OpenMeteoWeatherProvider`, com
+coordenadas explícitas de Brasília/DF (`-15.793889,-47.882778`). Ele consulta
+apenas a condição atual (temperatura, sensação, código, dia/noite e vento),
+faz parse defensivo com fixtures real, malformada e truncada, e é injetado no
+`WeatherService` pela interface `IWeatherProvider`. O service só habilita o
+request após Wi-Fi+NTP, agenda-o no `NetworkWorker` único a cada 30 min e
+guarda no `StateStore` um `WeatherState` de 24 B. Cache deliberadamente não
+entra nesta decisão.
+
+**Motivo:** Brasília/DF foi a localização escolhida para o MVP. Um payload
+pequeno reduz consumo de corpo/parsing; coordenada evita geocoding, nova API e
+ambiguidade de cidade. Separar provider de agenda e estado preserva o limite
+de uma conexão HTTPS, permite fixture no host e deixa a futura preferência de
+localização trocar somente a configuração/adaptador.
+
+**Consequências:** no primeiro boot offline ainda não há dado de clima — a UI
+futura deve representar ausência; após uma leitura live, falha posterior marca
+o último valor como `stale`. Cache persistente/versionado, escolha de cidade e
+tela ficam para suas ondas próprias; qualquer um exige nova decisão e custo de
+flash/UI declarado.
+
+## ADR-031 — Cache offline de clima em LittleFS, com throttle persistente
+
+**Decisão:** o clima usa um blob LittleFS de 28 B (`magic`, versão, tamanho,
+CRC e payload), gravado por `tmp + fsync + rename`. O cache nunca é formatado
+automaticamente quando houver conteúdo/corrupção: blob ausente, truncado,
+inválido ou de versão desconhecida é ignorado e o painel continua degradado.
+Uma partição comprovadamente virgem (setor raiz todo `0xFF`) recebe a estrutura
+inicial LittleFS uma única vez. A leitura no boot publica
+`WeatherSource::kCache` com `stale=true`; leitura ao vivo posterior a substitui.
+O timestamp UTC do último save viaja no blob e impede escrita em intervalo
+menor que 30 min inclusive depois de reboot.
+
+**Motivo:** a partição flash pode provocar uma piscada durante erase. Persistir
+apenas após resposta live, no `app_loop` — nunca na `net_worker`, render ou
+toque — conserva uma conexão HTTPS por vez e aplica o orçamento físico sem
+perder utilidade offline.
+
+**Consequências:** cache não é prova de atualidade e a UI deverá mostrar sua
+origem quando a tela entrar. Falha de montagem/escrita não bloqueia o boot nem
+a leitura live. A atomicidade e o codec são cobertos no host; a primeira
+validação de boot sem rede é registrada no `STATUS.md`; a possível piscada de
+escrita segue como medição de bancada.

@@ -68,6 +68,8 @@ Regras derivadas — **obrigatórias**:
 2. Corpo HTTP em SRAM interna, com teto de **48 KB**. Resposta maior é
    **falha do request** (conta no breaker), nunca truncamento silencioso.
    Mudar o teto exige atualizar esta tabela e medir heap.
+   A sonda HTTPS de bancada reutiliza exatamente esse buffer; SNTP é UDP e
+   só inicia após IP, antes da sonda, sem handshake TLS adicional.
 3. Parser JSON alocando em SRAM interna.
 4. Render LVGL em modo **parcial**, nunca FULL. **[herdado]**
 5. Rotação 180° por PPA (`sw_rotate=true`); com draw buffer em PSRAM usar
@@ -170,11 +172,51 @@ TLS. Isto **não é medição de HTTPS**: antes de habilitar qualquer provider �
 obrigatório registrar heap livre e maior bloco antes/durante/depois de um
 handshake real, e confirmar que permanece acima de 80 KiB em regime.
 
+**Primeira evidência em bancada (2026-07-27):** após NTP, uma sonda única para
+`https://example.com/` validou o certificado e recebeu HTTP 200 com 559 B. O
+heap interno lido imediatamente antes/depois foi **209/205 KiB**. Isso confirma
+o caminho e a margem pós-chamada, mas **não mede a mínima durante o handshake**.
+Três chamadas seriadas posteriores mediram antes/mínimo/depois em KiB:
+**206/181/204**, **202/180/202** e **200/179/202**. A mínima de **179 KiB**
+fica 99 KiB acima do piso de 80 KiB; o custo TLS está validado para este perfil
+de display, uma conexão por vez e corpo de 48 KiB.
+
 **Consequência para a Onda B:** antes de ligar rede, medir o heap interno livre
 **com o display ativo** e confrontar com o teto de 48 KB de corpo HTTP (§2) e
 com o TLS. Se apertar, a saída é avaliar `use_psram = true` no perfil do
 adapter — o que devolve os 100 KiB à SRAM mas coloca o buffer de desenho na
 PSRAM, competindo com o DSI. É troca a medir, não a assumir.
+
+**ClockService (Onda A, estimativa de código).** `ClockState` agora ocupa
+16 B e `AppState`, 24 B (antes 4 B): acréscimo de 20 B em RAM. O acesso da UI
+continua granular e copia só esses 16 B; nenhuma tela existe ainda, portanto a
+medição de pilha da Onda C continua obrigatória antes de desenhar o relógio.
+
+**Setup Wi-Fi (Onda B, estimativa de código).** `WifiSetupState` acrescenta
+16 B ao `AppState`; a UI lê apenas esse domínio, nunca a credencial. SSID e
+senha ocupam 98 B transitórios no `SetupService` e no adaptador de board, fora
+do estado e do EventBus. A associação usa o enlace SDIO já existente e não
+abre HTTPS. A primeira escrita de NVS só ocorre após **30 s com IP estável**;
+uma nova credencial causa no máximo **um `nvs_commit`**, portanto uma piscada
+branca possível (ADR-025), a confirmar em bancada. Tentativas de reconexão
+começam em 2 s e crescem até 30 s, sem novas escritas de flash.
+
+**Entrada USB de setup (estimativa).** A task `usb_provision` usa **4 KiB** de
+pilha, prioridade 2 e fica bloqueada esperando um byte da USB; o frame máximo é
+192 B e o mailbox guarda uma credencial (98 B) até a próxima `app_loop`. Não
+toca LVGL, não abre socket e não inicia escrita de flash. Medir a marca d'água
+da task na primeira bancada de provisionamento; ela fica abaixo da UI (4) e do
+worker de rede (3), portanto não pode atrasar render ou associação.
+
+**Clima Brasília/DF (Onda A, estimativa de código).** `WeatherState` ocupa
+**24 B** no `AppState`; o acesso futuro da UI continua granular e não há tela
+nesta entrega, portanto não há cópia nova para a pilha da `lvgl_task`. O
+provider usa o corpo HTTP interno já reservado de 48 KiB e não cria buffer ou
+task adicional. A consulta usa uma única conexão HTTPS pelo `net_worker`, a
+cada 30 min. O cache offline usa blob LittleFS de 28 B com `tmp+rename`; sua
+política persistida limita a **uma escrita a cada 30 min por domínio**, mesmo
+após reboot. A escrita só ocorre na `app_loop` depois de resposta live, nunca
+na UI, toque ou `net_worker`; seu impacto visual em bancada continua pendente.
 
 O amostrador roda a cada 5 s e só publica evento **na transição** de
 limiar, nunca a cada amostra. Evento sem handler real é proibido.
@@ -184,6 +226,8 @@ limiar, nunca a cada amostra. Evento sem handler real é proibido.
 - Cache: no máximo **1 escrita a cada 30 min por domínio**. **[herdado]**
 - NVS: dedup obrigatório — não regravar valor idêntico; agrupar commits.
 - **Nenhuma escrita de flash iniciada por callback de toque.**
+- Setup Wi-Fi: credencial só entra em NVS após 30 s com IP estável; falha de
+  associação nunca grava e reentrada da mesma credencial já salva não regrava.
 - OTA é o pior caso do barramento: roda com a UI em modo reduzido, nunca
   durante uso normal.
 

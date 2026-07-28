@@ -27,6 +27,13 @@ public:
         return true;
     }
     bool network_transport_ready() const override { return network_transport_ready_; }
+    bool start_wifi_station(const WifiCredentials&) override {
+        ++wifi_start_attempts_;
+        wifi_state_ = WifiConnectionState::kAssociating;
+        return network_transport_ready_;
+    }
+    WifiConnectionState wifi_connection_state() const override { return wifi_state_; }
+    void set_wifi_connection_state(WifiConnectionState state) { wifi_state_ = state; }
 
     bool lock_ui(uint32_t) override {
         ++ui_locks_;
@@ -49,6 +56,8 @@ public:
     bool network_transport_ready_ = false;
     int brightness_pct_ = -1;
     uint64_t rtc_s_ = 0;
+    WifiConnectionState wifi_state_ = WifiConnectionState::kIdle;
+    unsigned wifi_start_attempts_ = 0;
     unsigned ui_locks_ = 0;
     unsigned i2c_locks_ = 0;
 

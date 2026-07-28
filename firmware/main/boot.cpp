@@ -7,6 +7,7 @@
 #include "boot.hpp"
 
 #include "board/waveshare_board.hpp"
+#include "cache/weather_cache.hpp"
 #include "core/event_bus.hpp"
 #include "core/lock.hpp"
 #include "core/pump.hpp"
@@ -23,8 +24,17 @@
 #include "freertos/semphr.h"
 #include "freertos/task.h"
 #include "services/esp_http_client.hpp"
+#include "services/clock_service.hpp"
+#include "services/https_probe_service.hpp"
 #include "services/network_worker.hpp"
 #include "services/network_worker_task.hpp"
+#include "services/setup_service.hpp"
+#include "services/sntp_service.hpp"
+#include "services/usb_wifi_provisioner.hpp"
+#include "services/weather_service.hpp"
+#include "services/wifi_credentials_store.hpp"
+#include "services/wifi_provisioning_mailbox.hpp"
+#include "providers/open_meteo_weather_provider.hpp"
 #include "ui/screen_catalog.hpp"
 #include "ui/shell.hpp"
 
@@ -58,6 +68,7 @@ constexpr int kFirstFrameTimeoutMs = 3000;
 // de verdade entre ciclos, porque consumo em repouso define a temperatura de
 // regime num produto 24/7 (RESOURCE-BUDGET §8).
 constexpr uint32_t kTickPeriodMs = 100;
+constexpr services::ClockService::Config kClockConfig{};
 
 // Estado e rede não devem tomar o lock da UI: isso acoplaria uma mutação curta
 // do StateStore ao render e, quando o net_worker existir, deixaria TLS disputar
@@ -115,11 +126,7 @@ void start_network_transport(board::IBoard& board) {
     }
 }
 
-void start_network_worker(core::ILock& lock) {
-    static core::RequestOrchestrator requests(lock, 400);
-    static services::EspHttpClient http_client;
-    static services::NetworkWorker worker(requests, http_client);
-    static services::NetworkWorkerTask task(worker);
+void start_network_worker(services::NetworkWorkerTask& task) {
     if (!task.start()) {
         ESP_LOGE(kTag, "net_worker indisponivel; firmware permanece offline");
     }
@@ -157,6 +164,14 @@ void run() {
 
     static board::WaveshareBoard board;
     static diag::RenderMetrics metrics;
+
+#ifndef NOVA_TORTURE
+    // NVS antecede display por contrato de boot (§8). Se estiver indisponivel,
+    // seguimos sem credenciais salvas; nao apagamos a particao automaticamente.
+    if (services::initialize_wifi_credentials_storage() != utils::Status::kOk) {
+        ESP_LOGE(kTag, "NVS indisponivel; Wi-Fi salvo fica desativado nesta sessao");
+    }
+#endif
 
     if (!board.init_display()) {
         // Falha de display NÃO chama abort() (§8). Retry/reboot com backoff é da
@@ -199,24 +214,60 @@ void app_loop(board::IBoard& board) {
     static core::StateStore store(lock);
     static core::UiDispatcher dispatcher;
     static core::ServiceManager services;
+    static services::ClockService clock_service(store, board, kClockConfig);
+#ifndef NOVA_TORTURE
+    static core::RequestOrchestrator requests(lock, 400);
+    static services::EspHttpClient http_client;
+    static services::NetworkWorker worker(requests, http_client);
+    static services::NetworkWorkerTask network_worker_task(worker);
+    static services::SntpService sntp_service(board, clock_service);
+    static services::HttpsProbeService https_probe_service(store, board, worker);
+    static providers::OpenMeteoWeatherProvider weather_provider;
+    static cache::LittlefsWeatherCache weather_cache;
+    static services::WeatherService weather_service(store, board, worker, weather_provider, weather_cache);
+    static services::NvsWifiCredentialsStore wifi_credentials;
+    static services::WifiProvisioningMailbox wifi_provisioning_mailbox(lock);
+    static services::SetupService setup_service(store, board, wifi_credentials,
+                                                 wifi_provisioning_mailbox);
+    static services::UsbWifiProvisioner usb_provisioner(wifi_provisioning_mailbox);
+#endif
     static ui::ScreenRegistry screens;
     static ui::Shell shell(screens);
 
     if (!bus.subscribe(core::UiDispatcher::on_event, &dispatcher)) {
         ESP_LOGE(kTag, "dispatcher nao assinou o EventBus — UI nao atualizaria");
     }
+    if (cache::initialize_weather_cache_storage() != utils::Status::kOk) {
+        ESP_LOGW(kTag, "cache LittleFS indisponivel; clima segue sem persistencia offline");
+    }
     setup_shell(board, dispatcher, screens, shell);
+    if (services.register_service(clock_service) != utils::Status::kOk) {
+        ESP_LOGE(kTag, "ClockService nao registrou; hora permanece indisponivel");
+    }
+#ifndef NOVA_TORTURE
+    if (services.register_service(sntp_service) != utils::Status::kOk ||
+        services.register_service(https_probe_service) != utils::Status::kOk ||
+        services.register_service(weather_service) != utils::Status::kOk) {
+        ESP_LOGE(kTag, "servicos NTP/HTTPS nao registraram; rede segue degradada");
+    }
+    if (services.register_service(setup_service) != utils::Status::kOk) {
+        ESP_LOGE(kTag, "SetupService nao registrou; Wi-Fi permanece indisponivel");
+    }
+#endif
     if (services.start_all() != utils::Status::kOk) {
         ESP_LOGE(kTag, "ServiceManager nao iniciou; firmware permanece degradado");
     }
 #ifndef NOVA_TORTURE
-    start_network_worker(lock);
+    if (!usb_provisioner.start()) {
+        ESP_LOGE(kTag, "provisionamento USB indisponivel; Wi-Fi segue sem entrada local");
+    }
+    start_network_worker(network_worker_task);
 #endif
 
     // Ainda NÃO há tela registrada: telas são da Onda C (ADR-023). O ciclo roda
     // vazio de propósito — o caminho está fechado e instrumentado, e a primeira
     // tela só precisa se registrar no dispatcher.
-    ESP_LOGI(kTag, "app_loop iniciada (%u telas e 0 providers registrados)",
+    ESP_LOGI(kTag, "app_loop iniciada (%u telas e 1 provider registrado)",
              static_cast<unsigned>(screens.count()));
 
     for (;;) {

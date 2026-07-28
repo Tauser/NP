@@ -11,6 +11,7 @@ trap 'rm -rf "$OUT"' EXIT
 
 INC=(
   -I"$FW/components/board/include"
+  -I"$FW/components/cache/include"
   -I"$FW/components/diag/include"
   -I"$FW/components/core/include"
   -I"$FW/components/models/include"
@@ -77,6 +78,33 @@ INC=(
   -o "$OUT/test_time_provider"
 
 "$CXX" -std="${CXXSTD:-c++17}" -Wall -Wextra -Werror "${INC[@]}" \
+  "$HERE/test_open_meteo_weather_provider.cpp" \
+  "$FW/components/providers/src/open_meteo_weather_provider.cpp" \
+  "$FW/components/utils/src/status.cpp" \
+  -o "$OUT/test_open_meteo_weather_provider"
+
+"$CXX" -std="${CXXSTD:-c++17}" -Wall -Wextra -Werror "${INC[@]}" \
+  "$HERE/test_weather_cache.cpp" \
+  "$FW/components/cache/src/weather_cache_codec.cpp" \
+  "$FW/components/utils/src/status.cpp" \
+  -o "$OUT/test_weather_cache"
+
+"$CXX" -std="${CXXSTD:-c++17}" -Wall -Wextra -Werror "${INC[@]}" \
+  "$HERE/test_clock_service.cpp" \
+  "$FW/components/core/src/state_store.cpp" \
+  "$FW/components/services/src/clock_service.cpp" \
+  -o "$OUT/test_clock_service"
+
+"$CXX" -std="${CXXSTD:-c++17}" -Wall -Wextra -Werror "${INC[@]}" \
+  "$HERE/test_setup_service.cpp" \
+  "$FW/components/core/src/state_store.cpp" \
+  "$FW/components/services/src/setup_service.cpp" \
+  "$FW/components/services/src/wifi_credentials_store_mock.cpp" \
+  "$FW/components/services/src/wifi_provisioning_mailbox.cpp" \
+  "$FW/components/services/src/usb_wifi_provisioning_protocol.cpp" \
+  -o "$OUT/test_setup_service"
+
+"$CXX" -std="${CXXSTD:-c++17}" -Wall -Wextra -Werror "${INC[@]}" \
   "$HERE/test_screen_registry.cpp" \
   "$FW/components/ui/src/screen_registry.cpp" \
   -o "$OUT/test_screen_registry"
@@ -89,4 +117,8 @@ INC=(
 "$OUT/test_http_client"
 "$OUT/test_network_worker"
 "$OUT/test_time_provider"
+"$OUT/test_open_meteo_weather_provider"
+"$OUT/test_weather_cache"
+"$OUT/test_clock_service"
+"$OUT/test_setup_service"
 "$OUT/test_screen_registry"

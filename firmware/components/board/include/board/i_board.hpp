@@ -30,6 +30,23 @@ struct DrawBufferReport {
     size_t count_ = 0;
 };
 
+// Segredo transitório: nunca entra no AppState, EventBus ou log. O serviço o
+// recebe pela futura intenção de setup, usa para associar e só o persiste após
+// conexão estável (ADR-027).
+struct WifiCredentials {
+    static constexpr size_t kMaxSsidBytes = 32;
+    static constexpr size_t kMaxPassphraseBytes = 64;
+    char ssid_[kMaxSsidBytes + 1] = {};
+    char passphrase_[kMaxPassphraseBytes + 1] = {};
+};
+
+enum class WifiConnectionState : uint8_t {
+    kIdle = 0,
+    kAssociating,
+    kConnected,
+    kFailed,
+};
+
 class IBoard {
 public:
     virtual ~IBoard() = default;
@@ -43,6 +60,8 @@ public:
     // credenciais provisionadas e serviços ainda ausentes.
     virtual bool start_network_transport_async() = 0;
     virtual bool network_transport_ready() const = 0;
+    virtual bool start_wifi_station(const WifiCredentials& credentials) = 0;
+    virtual WifiConnectionState wifi_connection_state() const = 0;
 
     // Lock semântico do LVGL/display. `lock_shared_i2c` pode ser o MESMO lock
     // por baixo (touch e codec dividem o I2C, RESOURCE-BUDGET §6) — mas só a

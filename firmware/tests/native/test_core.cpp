@@ -134,17 +134,20 @@ void test_state_store() {
     core::StateStore st(lk);
 
     // set_clock: estado correto + fato registrado, mas SEM publicar sozinho.
-    check(st.set_clock(10, 30, true), "set_clock com valor novo => true");
+    check(st.set_clock({0, 10, 30, models::ClockSource::kRtc, true, false}),
+          "set_clock com valor novo => true");
     check(g_spy.count_ == 0, "setter NAO publica sozinho (so a app_loop publica)");
     check(drain_and_publish(st, bus) == 1, "drenagem publicou 1 evento");
     check(g_spy.last_ == models::Event::kClockChanged, "evento publicado e ClockChanged");
 
     // Valor idêntico: NÃO muta e NÃO registra fato — nada a drenar.
-    check(!st.set_clock(10, 30, true), "set_clock com valor IGUAL => false");
+    check(!st.set_clock({0, 10, 30, models::ClockSource::kRtc, true, false}),
+          "set_clock com valor IGUAL => false");
     check(drain_and_publish(st, bus) == 0, "valor igual NAO gerou evento (dedup)");
     check(g_spy.count_ == 1, "contagem de eventos inalterada");
 
-    check(st.set_clock(10, 31, true), "set_clock com minuto novo => true");
+    check(st.set_clock({0, 10, 31, models::ClockSource::kRtc, true, false}),
+          "set_clock com minuto novo => true");
     check(drain_and_publish(st, bus) == 1, "mudanca real gerou evento de novo");
     models::ClockState c = st.clock();
     check(c.hour_ == 10 && c.minute_ == 31 && c.valid_, "clock() devolve o valor gravado");
@@ -156,6 +159,23 @@ void test_state_store() {
     check(!st.set_network(models::NetworkState::kUp), "set_network igual => false");
     check(drain_and_publish(st, bus) == 0, "set_network igual NAO gerou evento");
     check(st.network() == models::NetworkState::kUp, "network() devolve o valor");
+
+    const models::WifiSetupState setup{42, models::WifiSetupPhase::kConnected, true};
+    check(st.set_wifi_setup(setup), "set_wifi_setup novo => true");
+    check(drain_and_publish(st, bus) == 1, "set_wifi_setup gerou 1 evento");
+    check(g_spy.last_ == models::Event::kWifiSetupChanged, "evento e WifiSetupChanged");
+    check(!st.set_wifi_setup(setup), "set_wifi_setup igual => false");
+    check(drain_and_publish(st, bus) == 0, "setup igual nao gerou evento");
+    check(st.wifi_setup().has_saved_credentials_, "wifi_setup() devolve o valor");
+
+    const models::WeatherState weather{100, 246, 231, 124, 3,
+                                       models::WeatherSource::kLive, true, true, false};
+    check(st.set_weather(weather), "set_weather novo => true");
+    check(drain_and_publish(st, bus) == 1, "set_weather gerou 1 evento");
+    check(g_spy.last_ == models::Event::kWeatherChanged, "evento e WeatherChanged");
+    check(!st.set_weather(weather), "set_weather igual => false");
+    check(st.weather().temperature_deci_c_ == 246 && !st.weather().stale_,
+          "weather() devolve o valor");
 
     // Prova que os acessores serializam e não vazam lock.
     check(lk.locks_ == lk.unlocks_, "todo lock teve unlock (sem vazamento)");
@@ -176,7 +196,7 @@ void test_coalescing() {
     core::StateStore st(lk);
 
     for (uint8_t m = 0; m < 20; ++m) {
-        st.set_clock(9, m, true);  // 20 mutações REAIS, todas diferentes
+        st.set_clock({0, 9, m, models::ClockSource::kRtc, true, false});  // 20 mutações REAIS
     }
     check(drain_and_publish(st, bus) == 1, "20 mutacoes de relogio => 1 evento");
     check(g_spy.count_ == 1, "handler chamado uma unica vez");
@@ -184,7 +204,7 @@ void test_coalescing() {
 
     // Dois domínios distintos coalescem separadamente: 1 evento cada.
     // (kUp difere do default kDown; usar kDown aqui seria um não-evento.)
-    st.set_clock(10, 0, true);
+    st.set_clock({0, 10, 0, models::ClockSource::kRtc, true, false});
     st.set_network(models::NetworkState::kUp);
     check(drain_and_publish(st, bus) == 2, "dominios distintos => 1 evento cada");
 
@@ -202,7 +222,7 @@ void test_publish_outside_lock() {
     g_store_for_reentrancy = &st;
     bus.subscribe(reading_handler, nullptr);
 
-    st.set_clock(7, 45, true);
+    st.set_clock({0, 7, 45, models::ClockSource::kRtc, true, false});
     drain_and_publish(st, bus);
 
     check(lk.reentrant_ == 0, "handler leu o estado SEM aninhar lock");
@@ -335,7 +355,7 @@ void test_pump_end_to_end() {
     check(bus.subscribe(core::UiDispatcher::on_event, &d), "dispatcher assina o bus");
 
     // Mutação de outra "task" -> nada acontece até o tick.
-    store.set_clock(8, 0, true);
+    store.set_clock({0, 8, 0, models::ClockSource::kRtc, true, false});
     check(tela.updates_ == 0, "mutacao sozinha nao invalida (so a app_loop publica)");
 
     check(core::pump_once(store, bus, d) == 1, "pump: 1 invalidacao");
@@ -343,7 +363,7 @@ void test_pump_end_to_end() {
 
     // O PEDIDO DA TAREFA: várias mutações coalescidas => UMA invalidação.
     for (uint8_t m = 1; m <= 30; ++m) {
-        store.set_clock(8, m, true);
+        store.set_clock({0, 8, m, models::ClockSource::kRtc, true, false});
     }
     check(core::pump_once(store, bus, d) == 1, "30 mutacoes => 1 invalidacao");
     check(tela.updates_ == 2, "tela atualizou UMA vez a mais, nao 30");

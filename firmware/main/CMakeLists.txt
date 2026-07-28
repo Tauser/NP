@@ -6,8 +6,10 @@ idf_component_register(
     REQUIRES
         # main/ é wiring: monta e conecta (docs/ARCHITECTURE.md §3).
         board
+        cache
         core
         diag
+        providers
         services
         ui
         esp_lvgl_adapter

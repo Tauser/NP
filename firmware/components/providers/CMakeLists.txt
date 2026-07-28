@@ -4,6 +4,7 @@
 idf_component_register(
     SRCS
         "src/mock_time_provider.cpp"
+        "src/open_meteo_weather_provider.cpp"
     INCLUDE_DIRS "include"
     REQUIRES
         models

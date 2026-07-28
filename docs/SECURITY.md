@@ -91,6 +91,23 @@ Irreversível. Ver `OPERATIONS.md` §4. Resumo:
   provisionamento.
 - Anti-rollback só depois do OTA provado.
 
+### 6.1 Credencial Wi-Fi em runtime
+
+- O `SetupService` recebe a credencial somente na `app_loop`; ela não entra em
+  `AppState`, `EventBus`, log nem payload de UI.
+- O driver remoto usa `WIFI_STORAGE_RAM`; a única persistência é o schema NVS
+  `wifi_cfg/v1`, depois de 30 s de IP estável. Produção exige NVS cifrada.
+- Uma versão de schema desconhecida é ignorada, sem erase automático. Falha de
+  NVS deixa o produto offline e explícito, nunca apaga uma credencial por conta
+  própria.
+- A entrada atual é **somente USB física**: frame `NPW1` com campos Base64,
+  recebido por uma task de baixa prioridade e passado por caixa de uma vaga à
+  `app_loop`. O firmware não ecoa nem registra o frame ou a senha; Base64 só
+  delimita o transporte, não é criptografia. O utilitário local pede a senha
+  sem mostrá-la e exige que o monitor esteja fechado durante o envio.
+- Não há SoftAP, captive portal nem endpoint de provisionamento. O MVP segue
+  sem porta de escuta e uma alternativa remota exige ADR novo.
+
 ## 7. Superfície de ataque que fica de fora
 
 Cada item aqui é uma decisão consciente de **não** expandir superfície:

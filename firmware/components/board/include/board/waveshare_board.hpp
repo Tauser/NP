@@ -19,6 +19,8 @@ public:
     bool init_display() override;
     bool start_network_transport_async() override;
     bool network_transport_ready() const override;
+    bool start_wifi_station(const WifiCredentials& credentials) override;
+    WifiConnectionState wifi_connection_state() const override;
     bool lock_ui(uint32_t timeout_ms) override;
     void unlock_ui() override;
     bool lock_shared_i2c(uint32_t timeout_ms) override;
@@ -29,6 +31,8 @@ public:
 
 private:
     static void network_transport_task(void* context);
+    static void wifi_event_handler(void* context, const char* event_base, int32_t event_id,
+                                   void* event_data);
 
     _lv_display_t* disp_ = nullptr;  // dono: esta board; lido só após init_display
     // Painel DPI, guardado para consultar os framebuffers que o DSI lê — a
@@ -40,6 +44,10 @@ private:
     // tentativa de inicialização do C6.
     std::atomic<bool> transport_starting_{false};
     std::atomic<bool> transport_ready_{false};
+    std::atomic<WifiConnectionState> wifi_state_{WifiConnectionState::kIdle};
+    bool wifi_initialized_ = false;  // dono: app_loop, após enlace pronto
+    bool wifi_started_ = false;      // dono: app_loop, impede esp_wifi_start repetido
+    void* wifi_netif_ = nullptr;
 };
 
 }  // namespace board

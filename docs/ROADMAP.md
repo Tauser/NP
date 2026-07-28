@@ -114,8 +114,12 @@ contrato `IHttpClient` com coletor de corpo limitado a 48 KiB.
 **Entregas restantes.** Contratos dos demais domínios e adapters reais de
 provider; telas de produto sobre o shell já registrado. O primeiro contrato
 (`ITimeProvider`) e seu mock, o registro vazio de telas e o Shell já existem. O `ServiceManager`, transporte ESP-IDF e o
-`NetworkWorker` serializado já existem, mas não há provider, credencial ou
-tráfego real até a validação de heap/TLS em bancada. A Onda A continua aberta até cumprir todos os
+`NetworkWorker` serializado já existem. O enlace, credencial, NTP e TLS foram
+validados em bancada; o primeiro adapter real (`OpenMeteoWeatherProvider`,
+Brasília/DF) usa esse mesmo caminho, tem fixtures e foi validado em placa. O
+cache offline de clima usa blob versionado e throttle, com boot sem rede
+validado em bancada; a medição visual da escrita permanece pendente. A Onda A continua
+aberta até cumprir todos os
 critérios abaixo.
 
 **Critérios de saída**

@@ -19,6 +19,8 @@ enum class Event : uint8_t {
     kClockChanged = 0,   // minuto virou
     kNetworkChanged,     // conectividade mudou de estado
     kResourceWarning,    // limiar de RAM interna cruzado (RESOURCE-BUDGET §3)
+    kWifiSetupChanged,   // estado de provisionamento/conexao mudou
+    kWeatherChanged,     // condicao atual, origem ou staleness mudou
     kCount,
 };
 

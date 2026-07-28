@@ -100,13 +100,33 @@ Pré-requisitos, sem exceção:
 4. Sem rede, o painel **deve** seguir operável com cache marcado como
    `stale`. Se travou, é bug de degradação, não de rede.
 
-### 5.4 Artefato visual
+### 5.4 Provisionar Wi-Fi por USB local
+
+1. Use a única porta USB da Waveshare (USB Serial/JTAG primária) e confirme que
+   o firmware mostra `usb.provision: pronto para frame NPW1 via USB fisico` no
+   boot. Uma USB Serial/JTAG configurada apenas como saída não aceita o frame.
+2. **Feche o monitor serial**: a porta COM aceita um cliente por vez.
+3. Em PowerShell, rode `tools/provision_wifi_usb.ps1 -Port COMx`; informe SSID
+   e senha somente no prompt local. Não use argumentos de linha de comando.
+   O utilitário mantém a COM aberta por 15 s e mostra os logs seguros recebidos
+   do dispositivo; use `-ObservationSeconds 30` se a associação for lenta.
+4. No próprio utilitário, confirme `credencial USB recebida`, depois a
+   associação e o IP. A senha não deve aparecer no terminal. Se não houver
+   confirmação, confira a COM e que o monitor está completamente fechado antes
+   de tentar de novo.
+5. Só após 30 s com IP estável o NVS grava uma vez; uma piscada branca isolada
+   nesse instante é o custo físico conhecido do erase de flash (ADR-025).
+
+O método é local por cabo; Base64 delimita o frame, não o cifra. Não existe
+portal, SoftAP ou endpoint LAN de setup.
+
+### 5.5 Artefato visual
 
 Não improvisar: seguir `GLITCH-PROTOCOLO.md`. Em ordem — endereço do draw
 buffer, backlight, build "torture", correlação por vídeo. **Uma variável por
 reflash.**
 
-### 5.5 Dado velho na tela
+### 5.6 Dado velho na tela
 
 1. O valor está marcado como `stale`? Se sim, é comportamento correto.
 2. Se está marcado como ao vivo e não é, o bug é de `source`/`last_update`

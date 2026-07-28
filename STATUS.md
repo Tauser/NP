@@ -29,8 +29,8 @@
 
 ```text
 Onda 0 - Atribuir o glitch de render                 [FECHADA — causa atribuída e corrigida]
-Onda A - Fundação: esqueleto, HAL, CI, render limpo  [em andamento — HAL, render, core/, utils/, orquestrador, ServiceManager, transporte/worker HTTP, contrato inicial de provider e shell/registro de UI prontos; adapters/domínios/telas de produto pendentes]
-Onda B - Dados reais, cache offline e degradação     [não iniciada]
+Onda A - Fundação: esqueleto, HAL, CI, render limpo  [em andamento — HAL, render, core/, utils/, orquestrador, ServiceManager, transporte/worker HTTP, setup Wi-Fi/NTP/TLS em placa, provider de clima com fixtures e shell/registro de UI prontos; telas de produto e fechamento da onda pendentes]
+Onda B - Dados reais, cache offline e degradação     [em andamento — cache offline de clima validado em placa; fault injection e demais critérios pendentes]
 Onda C - Telas do produto                            [não iniciada]
 Onda D - Robustez comprovável e observabilidade      [não iniciada]
 Onda E - Segurança, OTA e release                    [não iniciada]
@@ -85,7 +85,20 @@ como entregue sem todos os critérios atendidos e este arquivo atualizado.**
     Host check e testes nativos passam em 2026-07-27. `idf.py build` após as
     revisões de `core/` e `utils/` passou em 2026-07-27, confirmado pelo
     operador; não há flash ou validação de bancada dessas revisões.
-  - `components/services/` — `NetworkWorker` host-testável recebe handlers
+  - `components/services/` — `ClockService` inicia pela hora plausível do RTC,
+    mantém o minuto pelo relógio monotônico e expõe uma fronteira exclusiva da
+    `app_loop` para a futura entrega de NTP; sem RTC, mantém estado explícito
+    de hora indisponível e não derruba o boot. Ainda não há provider SNTP, Wi-Fi
+    associado ou sincronização NTP real. As unidades puras do manifesto e todos
+    os testes nativos, inclusive ClockService, passaram manualmente com g++ 15.2
+    em 2026-07-27; `host_check.sh` não rodou como script neste sandbox porque o
+    `bash` disponível não fornece `dirname`. O operador confirmou `idf.py build`
+    sem erros e flash desta revisão em 2026-07-27; RTC funcional, Wi-Fi, NTP e
+    HTTPS em bancada continuam não verificados. Com display ativo, o log confirmou
+    `H_SDIO_DRV: Received INIT event` e `board.ws: enlace P4<->C6 pronto; Wi-Fi
+    ainda nao associado` (~5,1 s de boot). A amostra inicial de render teve
+    `flush/upd(ult/max)=1/12` e `p95=9,62 ms`; o máximo de 12 pertence ao warm-up
+    (4 updates) e não valida o teto de regime. `NetworkWorker` host-testável recebe handlers
     registrados no wiring, obtém uma lease do `RequestOrchestrator` e executa
     no máximo uma chamada por vez; sua task alvo reserva 48 KiB de SRAM
     interna, usa pilha de 8 KiB/prioridade 3 e registra heap antes/depois. O
@@ -98,14 +111,76 @@ como entregue sem todos os critérios atendidos e este arquivo atualizado.**
     em `esp_timer.h` por dependência ausente em `services`; corrigido ao
     declarar `esp_timer` em `services` e `main`. O operador confirmou
     `idf.py build` + flash após a correção (`425ba7b`) em 2026-07-27. Enlace
-    C6, heap TLS e HTTPS em bancada **não foram verificados**.
-  - `components/providers/` — primeiro contrato por domínio, `ITimeProvider`,
-    devolve `Result<UtcTime>` e o `MockTimeProvider` permite testar um futuro
-    `ClockService` sem hardware ou rede. Não há adapter real, payload ou
-    fixture nesta etapa; o primeiro parser deve trazer fixtures real,
-    malformada e truncada conforme ADR-007. Host check/testes/arquitetura
-    passaram em 2026-07-27; o build/flash alvo desta revisão passou junto da
-    confirmação do operador para `425ba7b`, mas não há teste funcional do provider.
+    P4↔C6 foi confirmado em placa nesta revisão; heap TLS e HTTPS em bancada
+    **não foram verificados**. A fundação de setup Wi-Fi foi adicionada após
+    essa revisão: `SetupService` mantém credenciais fora de estado/eventos/log,
+    aguarda 30 s de IP estável antes do único commit NVS e reconecta com backoff
+    de 2–30 s; `WaveshareBoard` passa a configurar a estação remota em RAM após
+    o enlace. A entrada atual é USB física: `UsbWifiProvisioner` recebe um frame
+    `NPW1` sem ecoar segredo, entrega-o por mailbox protegido à `app_loop` e o
+    utilitário `tools/provision_wifi_usb.ps1` pede a senha sem mostrá-la. Não há
+    SoftAP, portal nem endpoint. `host_check.sh --app --tests`, todos os testes
+    nativos, `arch_check` e `idf.py build` desta revisão passaram em 2026-07-27
+    (ESP-IDF v5.5.4; `novapanel.bin` 0x15cc00, 83 % livre na menor partição).
+    O operador confirmou o **flash** desta revisão em 2026-07-27. Log de boot
+    em placa capturado às 16:17: boot limpo após reset USB, PSRAM 32 MB,
+    quatro buffers DMA-safe, primeiro frame em ~1,02 s e enlace P4↔C6 ativo
+    em ~5,18 s; nenhum panic/abort/erro de driver. A mensagem inicial do GDB
+    sobre `COMx` foi corrigida pelo monitor para `\\.\COM8`, não é erro do
+    firmware. Associação permanece ausente como esperado, pois ainda não há
+    canal de entrada de credenciais. O operador confirmou o flash da revisão de
+    provisionamento USB e a mensagem `usb.provision: pronto para frame NPW1 via
+    USB fisico`, mas a primeira tentativa não foi recebida: a USB única estava
+    como console secundário, que só entrega saída. A configuração foi corrigida
+    para USB Serial/JTAG como console primário (único que entrega `stdin`);
+    `idf.py build`, `host_check --app --tests`, testes nativos e `arch_check`
+    passaram em 2026-07-27 (`novapanel.bin` 0x1594a0, 83 % livre). O flash da
+    correção pela COM8 concluiu com hash verificado e reset automático. Em
+    bancada, a entrada USB foi recebida e a associação foi confirmada por
+    `esp_netif_handlers: sta ip` e `board.ws: Wi-Fi associado e com IP` aos
+    ~84 s de boot. Após aguardar o período estável e reiniciar, a placa
+    reassociou sozinha e recebeu IP aos ~14 s: persistência NVS e reconexão
+    automática estão confirmadas em bancada. A implementação de SNTP e da
+    sonda HTTPS serializada compilou no alvo (`novapanel.bin` 0x15b020,
+    83 % livre), com host check, testes nativos e arquitetura verdes. O flash
+    pela COM8 concluiu com hash verificado e reset automático. Em bancada, NTP
+    sincronizou e três sondas HTTPS seriadas validaram certificado, retornaram
+    200 com corpo de 559 B e mantiveram o heap interno mínimo durante TLS em
+    181/180/**179 KiB** (piso: 80 KiB); antes/depois: 206/204, 202/202 e
+    200/202 KiB. Render permaneceu em 1 flush/update e a folga da `lvgl_task`
+    em 13.292 B. A correção final que faz o log `3/3` ocorrer somente após a
+    última resposta foi flashed pelo operador. O custo TLS está validado nesta
+    bancada.
+  - `components/providers/` — contrato UTC (`ITimeProvider`) e primeiro
+    adapter real: `IWeatherProvider`/`OpenMeteoWeatherProvider` para
+    Brasília/DF, com parse puro de condição atual e fixtures versionadas
+    real/malformada/truncada (ADR-030). `WeatherService` habilita o fetch só
+    após Wi-Fi+NTP e usa o `NetworkWorker` já serializado, a cada 30 min; sem
+    cache, dado ausente permanece explícito e uma falha posterior marca a
+    última leitura como `stale`. O estado adiciona `WeatherState` de 24 B e o
+    provider não cria task, buffer HTTP ou escrita de flash. A primeira versão
+    foi flashed e percorreu Wi-Fi+NTP+TLS em placa; a resposta real expôs um
+    erro de parser (`current_units` era confundido com `current`), corrigido
+    com fixture equivalente. Host check, testes nativos, arquitetura e build
+    alvo da correção passaram em 2026-07-27 (`novapanel.bin` 0x15c350, 83 %
+    livre). O operador confirmou em 2026-07-28 o flash e a consulta de clima
+    funcionando em placa; Wi-Fi, NTP, TLS e parse do provider estão validados
+    no mesmo fluxo serializado.
+  - `components/cache/` — cache offline de clima: codec puro de 28 B com
+    magic/versão/tamanho/CRC, armazenamento LittleFS por `tmp+fsync+rename`
+    e timestamp UTC persistido que limita a escrita a uma por 30 min inclusive
+    após reboot (ADR-031). O `WeatherService` lê cache no boot como
+    `stale`, e só a `app_loop` persiste resposta live; host check/testes
+    nativos/arquitetura e `idf.py build` passaram em 2026-07-28. A primeira
+    tentativa revelou `storage` corrompida (`-84`) e não a formatou. Com
+    autorização explícita, o operador apagou somente `storage`
+    (`0x1020000`, 10 MB); uma revisão posterior inicializa LittleFS apenas se
+    o setor raiz estiver todo `0xFF`, preservando mídia não vazia/corrompida.
+    Essa revisão passou build (`novapanel.bin` 0x1665e0, 83 % livre) e foi
+    flashed com hash verificado. O operador confirmou a montagem e a primeira
+    escrita do cache em bancada. O operador confirmou também o reboot sem
+    Wi-Fi: o mesmo dado foi carregado do cache com `stale=true`. A validação
+    visual de eventual piscada durante a escrita ainda não foi medida.
   - `components/ui/` — `ScreenRegistry` puro aceita specs uma vez, recusa
     duplicata/capacidade excedida e é selado antes do Shell. O Shell registra
     invalidações no `UiDispatcher` sem tocar LVGL; um timer que roda na

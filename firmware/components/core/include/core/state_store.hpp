@@ -49,8 +49,10 @@ public:
     //
     // Devolvem `true` só quando o valor MUDOU. Valor igual não muta e não marca
     // nada: dedup na origem.
-    bool set_clock(uint8_t hour, uint8_t minute, bool valid);
+    bool set_clock(models::ClockState clock);
     bool set_network(models::NetworkState s);
+    bool set_wifi_setup(models::WifiSetupState setup);
+    bool set_weather(models::WeatherState weather);
 
     // ── Drenagem: EXCLUSIVA da `app_loop` ────────────────────────────────────
     // Devolve a máscara acumulada e a ZERA, atomicamente sob o lock. A
@@ -61,6 +63,8 @@ public:
     // ── Leitura granular (ADR-011) ───────────────────────────────────────────
     models::ClockState clock() const;
     models::NetworkState network() const;
+    models::WifiSetupState wifi_setup() const;
+    models::WeatherState weather() const;
 
 private:
     ILock& lock_;

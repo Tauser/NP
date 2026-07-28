@@ -12,6 +12,13 @@ components/core/src/request_orchestrator.cpp
 components/core/src/service_manager.cpp
 components/utils/src/status.cpp
 components/utils/src/http_client.cpp
+components/services/src/clock_service.cpp
+components/services/src/setup_service.cpp
+components/services/src/wifi_provisioning_mailbox.cpp
+components/services/src/usb_wifi_provisioning_protocol.cpp
 components/services/src/network_worker.cpp
 components/providers/src/mock_time_provider.cpp
+components/providers/src/open_meteo_weather_provider.cpp
+components/cache/src/weather_cache_codec.cpp
+components/providers/src/open_meteo_weather_provider.cpp
 components/ui/src/screen_registry.cpp
